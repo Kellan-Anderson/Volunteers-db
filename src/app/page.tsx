@@ -1,5 +1,6 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { getServerAuthSession } from "~/server/auth";
+import { SignInWithGoogleButton } from "~/components/auth/signInButton";
+import { getServerAuthSession } from "~/server/auth/auth";
 
 export default async function Home() {
   noStore();
@@ -9,9 +10,13 @@ export default async function Home() {
   return (
     <>
       {session ? (
-        <>User: {JSON.stringify(session.user)}</>
+        <div className="flex flex-col">
+          <div className="border border-black">
+            Role: {session.user.role}
+          </div>
+        </div>
       ) : (
-        <>No user</>
+        <SignInWithGoogleButton />
       )}
     </>
   );

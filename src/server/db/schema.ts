@@ -9,7 +9,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { type AdapterAccount } from "next-auth/adapters";
+import { createInsertSchema } from "drizzle-zod"
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -29,12 +29,16 @@ export const users = createTable("user", {
     mode: "date",
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
-  role: userRole('role').default('user')
+  role: userRole('role').notNull().default('user')
 });
+
+export const UserInsertSchema = createInsertSchema(users)
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
 }));
+
+export const AccountTypes = pgEnum('account_types', ['oath', 'oidc', 'email'])
 
 export const accounts = createTable(
   "account",
@@ -42,9 +46,10 @@ export const accounts = createTable(
     userId: varchar("userId", { length: 255 })
       .notNull()
       .references(() => users.id),
-    type: varchar("type", { length: 255 })
-      .$type<AdapterAccount["type"]>()
-      .notNull(),
+    type: AccountTypes("type").notNull(),
+      // varchar("type", { length: 255 })
+      // .$type<AdapterAccount["type"]>()
+      // .notNull(),
     provider: varchar("provider", { length: 255 }).notNull(),
     providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
     refresh_token: text("refresh_token"),
@@ -62,6 +67,8 @@ export const accounts = createTable(
     userIdIdx: index("account_userId_idx").on(account.userId),
   })
 );
+
+export const AccountInsertSchema = createInsertSchema(accounts);
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, { fields: [accounts.userId], references: [users.id] }),
@@ -98,3 +105,5 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );
+
+export const VerificationTokenInsertSchema = createInsertSchema(verificationTokens)
