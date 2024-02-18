@@ -9,11 +9,10 @@ type SignInWithGoogleButtonProps = {
 }
 
 export function SignInWithGoogleButton({ redirectTo } : SignInWithGoogleButtonProps) {
-	
 	return (
 		<Button
-			className="bg-white text-black w-[268px] h-fit"
-			onClick={async () => await signIn('google', { callbackUrl: redirectTo })}
+			className="bg-white hover:bg-secondary/90 text-black w-[268px] h-fit"
+			onClick={() => signIn('google', { callbackUrl: redirectTo })}
 		>
 			<div className="flex flex-row w-full justify-center items-center p-3">
 				<Image

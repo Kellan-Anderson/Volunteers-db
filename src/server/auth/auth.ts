@@ -40,8 +40,6 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   callbacks: {
     session: ({ session, user }) => {
-      console.log({session})
-      console.log({user})
       return {
         ...session,
         user: {
@@ -61,6 +59,10 @@ export const authOptions: NextAuthOptions = {
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     })
   ],
+
+  pages: {
+    signIn: '/sign-in'
+  }
 };
 
 /**
