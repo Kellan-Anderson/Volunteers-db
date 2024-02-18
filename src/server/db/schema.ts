@@ -29,13 +29,19 @@ export const users = createTable("user", {
     mode: "date",
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
-  role: userRole('role').notNull().default('user')
+  role: userRole('role').notNull().default('user'),
+  lastOrganizationId: varchar('last_organization', { length: 255 })
 });
 
 export const UserInsertSchema = createInsertSchema(users)
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
+  organizationsAndUsers: many(organizationsAndUsers),
+  lastOrganization: one(organizations, {
+    fields: [users.lastOrganizationId],
+    references: [organizations.id]
+  })
 }));
 
 export const AccountTypes = pgEnum('account_types', ['oath', 'oidc', 'email'])
@@ -107,3 +113,30 @@ export const verificationTokens = createTable(
 );
 
 export const VerificationTokenInsertSchema = createInsertSchema(verificationTokens)
+
+/* ------------------------------------------------ Organizations --------------------------------------------------- */
+export const organizations = createTable('organizations', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  organizationName: varchar('name', { length: 255 }).notNull(),
+  createdBy: varchar('created_by', { length: 255 }).notNull().references(() => users.id)
+});
+
+export const organizationsRelations = relations(organizations, ({ many }) => ({
+  organizationsAndUsers: many(organizationsAndUsers)
+}))
+
+export const organizationsAndUsers = createTable('organizations_and_users', {
+  userId: varchar('user_id', { length: 255 }).notNull().references(() => users.id),
+  organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id)
+});
+
+export const organizationsAndUsersRelations = relations(organizationsAndUsers, ({ one }) => ({
+  user: one(users, {
+    fields: [organizationsAndUsers.userId],
+    references: [users.id]
+  }),
+  organization: one(organizations, {
+    fields: [organizationsAndUsers.organizationId],
+    references: [organizations.id]
+  })
+}))

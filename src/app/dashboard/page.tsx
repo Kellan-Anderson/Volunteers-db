@@ -5,6 +5,9 @@ export default async function DashboardPage() {
 	const user = await VerifyUser({ callbackUrl: '/dashboard' });
 
 	return (
-		<>This is the dashboard</>
+		<>
+			This is the dashboard
+			user: {JSON.stringify(user)}
+		</>
 	);
 }
