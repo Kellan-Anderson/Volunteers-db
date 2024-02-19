@@ -14,7 +14,7 @@ type VerifyUserProps = {
 
 const defaultRedirect = '/sign-in'
 
-export async function VerifyUser(props?: VerifyUserProps) {
+export async function verifyUser(props?: VerifyUserProps) {
 	const session = await getServerAuthSession();
 	if(!session || props?.redirectOnSignedIn) {
 		const url = (props?.redirectTo ?? defaultRedirect) + (props?.callbackUrl ? `?callbackUrl=${props.callbackUrl}` : '')

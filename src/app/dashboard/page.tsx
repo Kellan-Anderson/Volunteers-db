@@ -1,8 +1,8 @@
-import { VerifyUser } from "~/lib/verifyUser";
+import { verifyUser } from "~/lib/verifyUser";
 
 export default async function DashboardPage() {
 
-	const user = await VerifyUser({ callbackUrl: '/dashboard' });
+	const user = await verifyUser({ callbackUrl: '/dashboard' });
 
 	return (
 		<>
