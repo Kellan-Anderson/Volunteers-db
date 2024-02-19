@@ -4,7 +4,7 @@ import { OrganizationForm } from "./newOrganizationForm";
 
 export default async function NewUserPage() {
 
-	const user = await verifyUser();
+	await verifyUser({ callbackUrl: '/new-organization' });
 
 	return (
 		<div className="h-screen w-full flex justify-center items-center">
@@ -14,7 +14,7 @@ export default async function NewUserPage() {
 					<CardDescription>This is the name of your new organization</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<OrganizationForm userId={user.id} />
+					<OrganizationForm />
 				</CardContent>
 			</Card>
 		</div>
