@@ -3,7 +3,8 @@ import { getServerAuthSession } from "~/server/auth/auth";
 
 type VerifyUserProps = {
 	verifyAdmin?: boolean,
-	callbackUrl?: string
+	callbackUrl?: string,
+	verifyUserOrganization?: boolean
 } & ({
 	redirectOnSignedIn: true,
 	redirectTo: string,
@@ -19,6 +20,10 @@ export async function verifyUser(props?: VerifyUserProps) {
 	if(!session || props?.redirectOnSignedIn) {
 		const url = (props?.redirectTo ?? defaultRedirect) + (props?.callbackUrl ? `?callbackUrl=${props.callbackUrl}` : '')
 		redirect(url);
+	}
+
+	if(session.user.lastOrganizationId === null) {
+		redirect('/new-organization')
 	}
 
 	if(props?.verifyAdmin && session.user.role !== 'admin') {

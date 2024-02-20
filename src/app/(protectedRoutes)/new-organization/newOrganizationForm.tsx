@@ -8,6 +8,7 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react"
 
 const organizationFormParser = z.object({
 	organizationName: z.string().min(1, 'Organization name is required')
@@ -15,7 +16,7 @@ const organizationFormParser = z.object({
 
 export function OrganizationForm() {
 	const router = useRouter();
-	const { mutate } = api.organizations.newOrganization.useMutation({
+	const { mutate, isLoading } = api.organizations.newOrganization.useMutation({
 		onSuccess: () => router.push('/dashboard')
 	})
 
@@ -53,7 +54,9 @@ export function OrganizationForm() {
 					type="submit"
 					className="mt-2 w-full"
 				>
-					Submit
+					{isLoading ? (
+						<Loader2 className="animate-spin text-blue-500"/>
+					) : "Submit"}
 				</Button>
 			</form>
 		</Form>
