@@ -15,21 +15,17 @@ import { CustomAdapter } from "./adapter";
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 
-type UserRole = 'admin' | 'user'
-
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
       // ...other properties
-      role: UserRole;
       lastOrganizationId: string | null
     } & DefaultSession["user"];
   }
 
   interface User {
     // ...other properties
-    role: UserRole;
     lastOrganizationId: string | null;
   }
 }
@@ -47,7 +43,6 @@ export const authOptions: NextAuthOptions = {
         user: {
           ...session.user,
           id: user.id,
-          role: user.role,
           lastOrganizationId: user.lastOrganizationId
         },
       }
