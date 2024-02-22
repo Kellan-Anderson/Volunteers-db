@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   pgEnum,
@@ -139,4 +140,14 @@ export const organizationsAndUsersRelations = relations(organizationsAndUsers, (
     fields: [organizationsAndUsers.organizationId],
     references: [organizations.id]
   })
-}))
+}));
+
+/* ------------------------------------------------ Invite Codes ---------------------------------------------------- */
+export const invites = createTable('invites', {
+  id: varchar('id').primaryKey(),
+  name: varchar('name', { length: 255 }).notNull(),
+  email: varchar('email').notNull(),
+  makeAdmin: boolean('make_admin').notNull().default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+  organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id, { onDelete: "cascade" }),
+})
