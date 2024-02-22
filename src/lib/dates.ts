@@ -12,7 +12,7 @@ export function createDate(timeAmount: number, unit: units, direction: direction
 
 	const date = new Date();
 	if(unit === 'days') {
-		date.setDate(date.getDay() + amount);
+		date.setDate(date.getDate() + amount);
 	} else if(unit === 'months') {
 		date.setMonth(date.getMonth() + amount)
 	} else {

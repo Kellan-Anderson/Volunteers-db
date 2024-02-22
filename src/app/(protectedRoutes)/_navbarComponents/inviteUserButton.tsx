@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
@@ -10,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/u
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
+import { api } from "~/trpc/react";
 
 export function InviteUserButton() {
 	const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
@@ -25,14 +27,21 @@ export function InviteUserButton() {
 					<DialogHeader>
 						<DialogTitle>Invite user</DialogTitle>
 					</DialogHeader>
-					<InviteUserForm />
+					<InviteUserForm onSubmitSuccess={() => setInviteDialogOpen(false)} />
 				</DialogContent>
 			</Dialog>
 		</>
 	);
 }
 
-function InviteUserForm() {
+type InviteUserFormProps = {
+	onSubmitSuccess?: () => void
+}
+
+function InviteUserForm({ onSubmitSuccess } : InviteUserFormProps) {
+	const { mutate, isLoading } = api.invites.sendInvite.useMutation({
+		onSuccess: onSubmitSuccess
+	})
 	const inviteUserParser = z.object({
 		name: z.string().min(1, 'Name is required'),
 		email: z.string().min(1, 'Email is required').email('Please enter a valid email'),
@@ -48,12 +57,12 @@ function InviteUserForm() {
 	});
 
 	const onInviteSubmit: SubmitHandler<z.infer<typeof inviteUserParser>> = (values) => {
-		console.log({values})
+		mutate(values)
 	}
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onInviteSubmit)}>
+			<form onSubmit={form.handleSubmit(onInviteSubmit)} className="flex flex-col gap-1.5">
 				<FormField
 					control={form.control}
 					name="name"
@@ -82,7 +91,7 @@ function InviteUserForm() {
 				/>
 				<Accordion type="single" collapsible>
 					<AccordionItem value="more-items">
-						<AccordionTrigger>More options</AccordionTrigger>
+						<AccordionTrigger className="pl-1">More options</AccordionTrigger>
 						<AccordionContent>
 							<FormField
 								control={form.control}
@@ -105,7 +114,9 @@ function InviteUserForm() {
 						</AccordionContent>
 					</AccordionItem>
 				</Accordion>
-				<Button type="submit" className="w-full mt-2">Send invite</Button>
+				<Button type="submit" className="w-full mt-2">
+					{isLoading ? <Loader2 className="animate-spin text-blue-500" /> : "Send invite"}
+				</Button>
 			</form>
 		</Form>
 	);

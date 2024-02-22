@@ -23,7 +23,7 @@ export function InviteEmail({ expiresIn, name, makeAdmin, organizationName, link
 						You have been invited to join {organizationName} {makeAdmin && "as an admin"}. Click the link below to get 
 						started
 					</p>
-					<a href={link}>Click here</a>
+					<a href={link}>Click here: {link}</a>
 					<p>This link expires in {dayjs(expiresIn).fromNow()}</p>
 				</div>
 			</body>

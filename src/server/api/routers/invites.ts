@@ -23,7 +23,7 @@ export const invitesRouter = createTRPCRouter({
 			const organization = await ctx.db
 				.query
 				.organizations
-				.findFirst({ where: eq(organizations, organizationId)});
+				.findFirst({ where: eq(organizations.id, organizationId)});
 			if(!organization) throw new Error('Could not find the users organization')
 
 			const inviteId = randomId({ prefix: 'invite' })
@@ -39,17 +39,18 @@ export const invitesRouter = createTRPCRouter({
 			if(!host) throw new Error('Could not retrieve page host');
 
 			const resend = new Resend(env.RESEND_API_KEY);
-			await resend.emails.send({
+			const { error: resendError } = await resend.emails.send({
 				from: `${organization.organizationName} <onboarding@resend.dev>`,
 				subject: `You have been invited to join ${organization.organizationName}`,
 				to: input.email,
 				react: InviteEmail({
 					expiresIn: createDate(3, 'days', 'from now'),
-					link: `${host}/join-organization/${inviteId}`,
+					link: `http://${host}/join-organization/${inviteId}`,
 					name: input.name,
 					organizationName: organization.organizationName,
 					makeAdmin: input.makeAdmin
 				})
-			})
+			});
+			console.log({ resendError })
 		})
 })
