@@ -1,6 +1,7 @@
 import { verifyUser } from "~/lib/verifyUser";
 import { OrganizationDropdown } from "../_navbarComponents/organizationDropdown";
 import { api } from "~/trpc/server";
+import { InviteUserButton } from "../_navbarComponents/inviteUserButton";
 
 export default async function DashboardPage() {
 
@@ -10,7 +11,7 @@ export default async function DashboardPage() {
 	return (
 		<>
 			<OrganizationDropdown organizationsList={organizations} usersLastOrganization={user.lastOrganizationId!} />
-			{JSON.stringify(user)}
+			<InviteUserButton />
 		</>
 	);
 }
