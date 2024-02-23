@@ -21,3 +21,10 @@ export function createDate(timeAmount: number, unit: units, direction: direction
 
 	return date;
 }
+
+export function compareDates(date1: Date, direction: 'before' | 'after', date2: Date) {
+	if(direction === 'before') {
+		return date1 < date2;
+	}
+	return date2 > date1
+}

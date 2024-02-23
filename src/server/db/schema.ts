@@ -148,6 +148,13 @@ export const invites = createTable('invites', {
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email').notNull(),
   makeAdmin: boolean('make_admin').notNull().default(false),
-  createdAt: timestamp('created_at').defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(),
   organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id, { onDelete: "cascade" }),
-})
+});
+
+export const invitesRelations = relations(invites, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [invites.organizationId],
+    references: [organizations.id]
+  })
+}))

@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { invites, organizations } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
 import { env } from "~/env";
 import { Resend } from "resend"
 import { eq } from "drizzle-orm";
 import { InviteEmail } from "~/components/emails/inviteEmail";
-import { createDate } from "~/lib/dates";
+import { compareDates, createDate } from "~/lib/dates";
 
 export const invitesRouter = createTRPCRouter({
 	sendInvite: protectedProcedure
@@ -32,7 +32,8 @@ export const invitesRouter = createTRPCRouter({
 				.values({
 					...input,
 					organizationId,
-					id: inviteId
+					id: inviteId,
+					expiresAt: createDate(3, 'days', 'from now')
 				});
 			
 			const host = ctx.headers.get('host');
@@ -52,5 +53,26 @@ export const invitesRouter = createTRPCRouter({
 				})
 			});
 			console.log({ resendError })
+		}),
+
+	getInvite: publicProcedure
+		.input(z.object({
+			inviteCode: z.string()
+		}))
+		.query(async ({ ctx, input }) => {
+			const invite = await ctx.db.query.invites.findFirst({
+				where: eq(invites.id, input.inviteCode),
+				with: {
+					organization: true
+				}
+			});
+
+			if(!invite) return null;
+
+			return {
+				name: invite.name,
+				organizationName: invite.organization.organizationName,
+				expired: compareDates(new Date(), 'after', invite.expiresAt)
+			}
 		})
 })
