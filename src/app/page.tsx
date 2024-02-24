@@ -12,9 +12,6 @@ export default async function Home() {
     <>
       {session ? (
         <div className="flex flex-col">
-          <div className="border border-black">
-            Role: {session.user.role}
-          </div>
           <SignOutButton />
         </div>
       ) : (
@@ -23,3 +20,5 @@ export default async function Home() {
     </>
   );
 }
+
+// TODO Add a form at the bottom of the home page for contacting the dev

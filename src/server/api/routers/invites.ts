@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
-import { invites, organizations } from "~/server/db/schema";
+import { invites, organizations, organizationsAndUsers, users } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
 import { env } from "~/env";
 import { Resend } from "resend"
@@ -72,7 +72,38 @@ export const invitesRouter = createTRPCRouter({
 			return {
 				name: invite.name,
 				organizationName: invite.organization.organizationName,
+				adminInvite: invite.makeAdmin,
 				expired: compareDates(new Date(), 'after', invite.expiresAt)
 			}
+		}),
+
+	makeDecision: protectedProcedure
+		.input(z.object({
+			inviteCode: z.string(),
+			decision: z.enum(['join', 'deny'])
+		}))
+		.mutation(async ({ ctx, input }) => {
+			const invite = await ctx.db.query.invites.findFirst({ where: eq(invites.id, input.inviteCode) })
+			if(!invite) throw new Error('There was an error retrieving your invite')
+			if(input.decision === 'join') {
+				await Promise.all([
+					ctx.db
+						.insert(organizationsAndUsers)
+						.values({
+							organizationId: invite.organizationId,
+							userId: ctx.session.user.id,
+							permission: invite.makeAdmin ? 'admin' : 'user'
+						}),
+					ctx.db
+						.update(users)
+						.set({
+							lastOrganizationId: invite.organizationId
+						})
+						.where(eq(users.id, ctx.session.user.id))
+				])
+			}
+			await ctx.db
+				.delete(invites)
+				.where(eq(invites.id, input.inviteCode))
 		})
 })
