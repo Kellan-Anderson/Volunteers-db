@@ -8,6 +8,7 @@ import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import { uploadFiles } from "~/lib/uploadthing";
 import { api } from "~/trpc/react";
 
 export function AddVolunteersForm() {
@@ -22,6 +23,7 @@ export function AddVolunteersForm() {
 		email: z.string().min(1, 'Email is required').email('Please enter a valid email'),
 		phoneNumber: z.string().optional(),
 		notes: z.string().optional(),
+		profilePicture: z.instanceof(FileList).optional(),
 	});
 
 	const form = useForm<z.infer<typeof volunteersParser>>({
@@ -34,8 +36,19 @@ export function AddVolunteersForm() {
 		resolver: zodResolver(volunteersParser)
 	});
 
-	const onAddVolunteerSubmit: SubmitHandler<z.infer<typeof volunteersParser>> = (values) => {
-		mutate(values)
+	const fileRef = form.register('profilePicture');
+
+	const onAddVolunteerSubmit: SubmitHandler<z.infer<typeof volunteersParser>> = async (values) => {
+		let profilePictureUrl: string | undefined = undefined;
+		const uploadFile = values.profilePicture?.item(0);
+		if(uploadFile) {
+			const uploadedFile = await uploadFiles('profilePictureUpload', { files: [uploadFile] })
+			profilePictureUrl = uploadedFile.at(0)?.url;
+		}
+		mutate({
+			...values,
+			profilePictureUrl
+		});
 	}
 
 	return (
@@ -96,9 +109,27 @@ export function AddVolunteersForm() {
 						</FormItem>
 					)}
 				/>
+				<FormField
+					control={form.control}
+					name="profilePicture"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel>Profile picture</FormLabel>
+							<FormControl>
+								<Input
+									type="file"
+									ref={fileRef.ref}
+									name={fileRef.name}
+									onBlur={fileRef.onBlur}
+									onChange={(e) => field.onChange(e.target?.files?.[0] ?? undefined)}
+								/>
+							</FormControl>
+						</FormItem>
+					)}
+				/>
 				<Button
 					type="submit"
-					className="w-full mt-2"
+					className="w-full mt-3"
 				>
 					Submit
 				</Button>

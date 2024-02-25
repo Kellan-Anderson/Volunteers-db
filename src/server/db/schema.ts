@@ -169,7 +169,8 @@ export const volunteers = createTable('volunteers', {
   notes: text('notes'),
   organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id),
   createdAt: timestamp('created_at').defaultNow(),
-  createdBy: varchar('created_by', { length: 255 }).notNull().references(() => users.id)
+  createdBy: varchar('created_by', { length: 255 }).notNull().references(() => users.id),
+  profilePictureUrl: varchar('profile_picture_url'),
 });
 
 export const volunteersRelations = relations(volunteers, ({ one }) => ({

@@ -11,6 +11,7 @@ export const volunteersRouter = createTRPCRouter({
 			email: z.string(),
 			phoneNumber: z.string().optional(),
 			notes: z.string().optional(),
+			profilePictureUrl: z.string().optional(),
 		}))
 		.mutation(async ({ ctx, input }) => {
 			const { id: userId, lastOrganizationId } = ctx.session.user;
