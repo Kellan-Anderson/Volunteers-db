@@ -118,7 +118,7 @@ export const VerificationTokenInsertSchema = createInsertSchema(verificationToke
 export const organizations = createTable('organizations', {
   id: varchar('id', { length: 255 }).primaryKey(),
   organizationName: varchar('name', { length: 255 }).notNull(),
-  createdBy: varchar('created_by', { length: 255 }).notNull().references(() => users.id)
+  createdBy: varchar('created_by', { length: 255 }).notNull().references(() => users.id, { onDelete: 'cascade' })
 });
 
 export const organizationsRelations = relations(organizations, ({ many }) => ({
@@ -126,8 +126,8 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
 }))
 
 export const organizationsAndUsers = createTable('organizations_and_users', {
-  userId: varchar('user_id', { length: 255 }).notNull().references(() => users.id),
-  organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id),
+  userId: varchar('user_id', { length: 255 }).notNull().references(() => users.id, { onDelete: 'cascade' }),
+  organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id, { onDelete: 'cascade' }),
   permission: userRole('role').notNull().default('user'),
 });
 

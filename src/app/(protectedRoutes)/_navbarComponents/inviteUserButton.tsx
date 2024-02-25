@@ -19,6 +19,8 @@ export function InviteUserButton() {
 		<>
 			<Button
 				onClick={() => setInviteDialogOpen(true)}
+				className="w-full py-5 text-sm"
+				variant="secondary"
 			>
 				Invite user to organization
 			</Button>

@@ -7,8 +7,8 @@ export const CustomAdapter: Adapter = {
 	async createUser(data) {
 		const id = crypto.randomUUID();
 		const createdUser = await db.insert(users).values({
-			email: data.email,
 			id,
+			...data
 		}).returning();
 
 		return createdUser[0]!

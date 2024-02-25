@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { organizations, organizationsAndUsers, users } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const organizationsRouter = createTRPCRouter({
 	newOrganization: protectedProcedure
@@ -42,10 +42,35 @@ export const organizationsRouter = createTRPCRouter({
 					organization: true
 				}
 			});
-			const orgs = userOrgs.map(({ organization }) => ({
+			const orgs = userOrgs.map(({ organization, permission }) => ({
+				permission,
 				name: organization.organizationName,
-				id: organization.id
+				id: organization.id,
 			}));
 			return orgs
+		}),
+
+	getCurrentOrganization: protectedProcedure
+		.query(async ({ ctx }) => {
+			const { id: userId, lastOrganizationId } = ctx.session.user;
+			if(lastOrganizationId === null) {
+				throw new Error('User has not joined or setup an organization')
+			}
+			const usersOrg = await ctx.db.query.organizationsAndUsers.findFirst({
+				where: and(
+					eq(organizationsAndUsers.userId, userId),
+					eq(organizationsAndUsers.organizationId, lastOrganizationId)
+				),
+				with: {
+					organization: true
+				}
+			});
+			if(!usersOrg) {
+				throw new Error('There was an issue finding the users organization')
+			}
+			return {
+				permission: usersOrg.permission,
+				organizationName: usersOrg.organization.organizationName
+			}
 		})
 })
