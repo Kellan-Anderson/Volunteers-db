@@ -1,7 +1,9 @@
 'use client'
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
@@ -12,10 +14,12 @@ import { uploadFiles } from "~/lib/uploadthing";
 import { api } from "~/trpc/react";
 
 export function AddVolunteersForm() {
+	const [loading, setLoading] = useState(false);
 
 	const router = useRouter();
 	const { mutate } = api.volunteers.addVolunteer.useMutation({
-		onSuccess: () => router.push('/dashboard')
+		onSuccess: () => router.push('/dashboard'),
+		onError: () => setLoading(false)
 	})
 
 	const volunteersParser = z.object({
@@ -41,6 +45,7 @@ export function AddVolunteersForm() {
 	const onAddVolunteerSubmit: SubmitHandler<z.infer<typeof volunteersParser>> = async (values) => {
 		let profilePictureUrl: string | undefined = undefined;
 		const uploadFile = values.profilePicture?.item(0);
+		setLoading(true);
 		if(uploadFile) {
 			const uploadedFile = await uploadFiles('profilePictureUpload', { files: [uploadFile] })
 			profilePictureUrl = uploadedFile.at(0)?.url;
@@ -131,7 +136,7 @@ export function AddVolunteersForm() {
 					type="submit"
 					className="w-full mt-3"
 				>
-					Submit
+					{loading ? <Loader2 className="text-blue-500 animate-spin" /> : "Submit"}
 				</Button>
 			</form>
 		</Form>
