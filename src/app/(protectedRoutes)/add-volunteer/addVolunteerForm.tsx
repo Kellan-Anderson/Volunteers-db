@@ -1,20 +1,29 @@
 'use client'
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import { api } from "~/trpc/react";
 
 export function AddVolunteersForm() {
+
+	const router = useRouter();
+	const { mutate } = api.volunteers.addVolunteer.useMutation({
+		onSuccess: () => router.push('/dashboard')
+	})
+
 	const volunteersParser = z.object({
 		name: z.string().min(1, 'Name is required'),
 		email: z.string().min(1, 'Email is required').email('Please enter a valid email'),
 		phoneNumber: z.string().optional(),
 		notes: z.string().optional(),
 	});
+
 	const form = useForm<z.infer<typeof volunteersParser>>({
 		defaultValues: {
 			email: '',
@@ -26,7 +35,7 @@ export function AddVolunteersForm() {
 	});
 
 	const onAddVolunteerSubmit: SubmitHandler<z.infer<typeof volunteersParser>> = (values) => {
-		console.log({values});
+		mutate(values)
 	}
 
 	return (
