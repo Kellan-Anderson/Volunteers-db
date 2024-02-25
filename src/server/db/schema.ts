@@ -157,4 +157,29 @@ export const invitesRelations = relations(invites, ({ one }) => ({
     fields: [invites.organizationId],
     references: [organizations.id]
   })
+}));
+
+/* ------------------------------------------------- Volunteers ----------------------------------------------------- */
+export const volunteers = createTable('volunteers', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  url: varchar('url', { length: 255 }).notNull().unique(),
+  name: varchar('name', { length: 255 }).notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  phoneNumber: varchar('phone_number', { length: 20 }),
+  notes: text('notes'),
+  organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id),
+  createdAt: timestamp('created_at').defaultNow(),
+  createdBy: varchar('created_by', { length: 255 }).notNull().references(() => users.id)
+});
+
+export const volunteersRelations = relations(volunteers, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [volunteers.organizationId],
+    references: [organizations.id]
+  }),
+
+  createdBy: one(users, {
+    fields: [volunteers.createdBy],
+    references: [users.id]
+  })
 }))

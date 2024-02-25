@@ -2,6 +2,7 @@ import { createTRPCRouter } from "~/server/api/trpc";
 import { organizationsRouter } from "./routers/organizations";
 import { usersRouter } from "./routers/users";
 import { invitesRouter } from "./routers/invites";
+import { volunteersRouter } from "./routers/volunteers";
 
 /**
  * This is the primary router for your server.
@@ -11,6 +12,7 @@ import { invitesRouter } from "./routers/invites";
 export const appRouter = createTRPCRouter({
   invites: invitesRouter,
   organizations: organizationsRouter,
+  volunteers: volunteersRouter,
   users: usersRouter,
 });
 
