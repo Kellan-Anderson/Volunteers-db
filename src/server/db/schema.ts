@@ -122,7 +122,8 @@ export const organizations = createTable('organizations', {
 });
 
 export const organizationsRelations = relations(organizations, ({ many }) => ({
-  organizationsAndUsers: many(organizationsAndUsers)
+  organizationsAndUsers: many(organizationsAndUsers),
+  categories: many(categories)
 }))
 
 export const organizationsAndUsers = createTable('organizations_and_users', {
@@ -173,14 +174,48 @@ export const volunteers = createTable('volunteers', {
   profilePictureUrl: varchar('profile_picture_url'),
 });
 
-export const volunteersRelations = relations(volunteers, ({ one }) => ({
+export const volunteersRelations = relations(volunteers, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [volunteers.organizationId],
     references: [organizations.id]
   }),
-
   createdBy: one(users, {
     fields: [volunteers.createdBy],
     references: [users.id]
+  }),
+  categories: many(categoriesAndVolunteers)
+}));
+
+/* ------------------------------------------------- Categories ----------------------------------------------------- */
+export const categories = createTable('categories', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  urlId: varchar('url_id').notNull().unique(),
+  name: varchar('name').notNull(),
+  organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id, { onDelete: 'cascade'})
+});
+
+export const categoriesRelations = relations(categories, ({ one, many }) => ({
+  volunteers: many(categoriesAndVolunteers),
+  organizations: one(organizations, {
+    fields: [categories.organizationId],
+    references: [organizations.id]
+  }),
+}));
+
+export const categoriesAndVolunteers = createTable('categories_and_volunteers', {
+  categoryId: varchar('category_id', { length: 255 }).notNull().references(() => categories.id, { onDelete: 'cascade'}),
+  volunteerId: varchar('volunteer_id', { length: 255 }).notNull().references(() => volunteers.id, { onDelete: 'cascade' })
+}, (t) => ({
+  pk: primaryKey({ columns: [t.categoryId, t.volunteerId] })
+}));
+
+export const categoriesAndVolunteersRelations = relations(categoriesAndVolunteers, ({ one }) => ({
+  volunteer: one(volunteers, {
+    fields: [categoriesAndVolunteers.volunteerId],
+    references: [volunteers.id]
+  }),
+  category: one(categories, {
+    fields: [categoriesAndVolunteers.categoryId],
+    references: [categories.id]
   })
 }))

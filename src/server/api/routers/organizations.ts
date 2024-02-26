@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { organizations, organizationsAndUsers, users } from "~/server/db/schema";
+import { categories, organizations, organizationsAndUsers, users } from "~/server/db/schema";
 import { and, eq } from "drizzle-orm";
 
 export const organizationsRouter = createTRPCRouter({
@@ -62,7 +62,13 @@ export const organizationsRouter = createTRPCRouter({
 					eq(organizationsAndUsers.organizationId, lastOrganizationId)
 				),
 				with: {
-					organization: true
+					organization: {
+						with: {
+							categories: {
+								where: eq(categories.organizationId, lastOrganizationId)
+							}
+						}
+					}
 				}
 			});
 			if(!usersOrg) {
@@ -70,7 +76,8 @@ export const organizationsRouter = createTRPCRouter({
 			}
 			return {
 				permission: usersOrg.permission,
-				organizationName: usersOrg.organization.organizationName
+				organizationName: usersOrg.organization.organizationName,
+				categories: usersOrg.organization.categories
 			}
 		})
 })

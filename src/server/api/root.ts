@@ -3,6 +3,7 @@ import { organizationsRouter } from "./routers/organizations";
 import { usersRouter } from "./routers/users";
 import { invitesRouter } from "./routers/invites";
 import { volunteersRouter } from "./routers/volunteers";
+import { categoriesRouter } from "./routers/categories";
 
 /**
  * This is the primary router for your server.
@@ -10,6 +11,7 @@ import { volunteersRouter } from "./routers/volunteers";
  * All routers added in /api/routers should be manually added here.
 */
 export const appRouter = createTRPCRouter({
+  categories: categoriesRouter,
   invites: invitesRouter,
   organizations: organizationsRouter,
   volunteers: volunteersRouter,
