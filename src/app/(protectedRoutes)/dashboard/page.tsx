@@ -5,7 +5,7 @@ export default async function DashboardPage() {
 
 	return (
 		<>
-			<header className="flex flex-row justify-between items-center p-2 border-b">
+			<header className="flex flex-row justify-between items-center p-2 pl-14 lg:pl-2 border-b">
 				<h1 className="font-bold text-lg">Volunteers</h1>
 				<AddVolunteerButton />
 			</header>

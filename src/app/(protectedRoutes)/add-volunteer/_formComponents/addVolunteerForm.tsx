@@ -22,6 +22,8 @@ import {
 	volunteersParser,
 } from "~/types";
 import { CategoriesArea } from "./categoriesArea";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 type VolunteerFormProps = {
 	categories: category[],
@@ -72,9 +74,19 @@ export function AddVolunteersForm({ categories, admin=false } : VolunteerFormPro
 					<Input
 						type="file"
 						onChange={(e) => setProfilePicture(e.target.files?.item(0) ?? undefined)}
-					/>
+						/>
 				</div>
-				<CategoriesArea categories={categories} control={form.control} admin={admin} />
+				<CardHeader className="p-0 pt-6">
+					<CardTitle className="font-bold">Extras</CardTitle>
+				</CardHeader>
+				<Accordion type="multiple">
+					<AccordionItem value="categories">
+						<AccordionTrigger>Categories</AccordionTrigger>
+						<AccordionContent>
+							<CategoriesArea categories={categories} control={form.control} admin={admin} />
+						</AccordionContent>
+					</AccordionItem>
+				</Accordion>				
 				<Button
 					type="button"
 					className="w-full mt-3"

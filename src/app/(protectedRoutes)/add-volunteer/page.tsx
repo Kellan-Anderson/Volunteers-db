@@ -11,7 +11,7 @@ export default async function AddVolunteerPage() {
 		<div className="h-screen w-full flex justify-center overflow-auto py-3">
 			<Card className="w-1/2 h-fit">
 				<CardHeader>
-					<CardTitle>Add a volunteer</CardTitle>
+					<CardTitle className="font-bold">Add a volunteer</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<AddVolunteersForm 
