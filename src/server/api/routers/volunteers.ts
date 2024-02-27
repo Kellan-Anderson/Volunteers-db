@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { and, eq } from "drizzle-orm";
-import { categoriesAndVolunteers, volunteers } from "~/server/db/schema";
+import { filtersAndVolunteers, volunteers } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
 
 export const volunteersRouter = createTRPCRouter({
@@ -12,7 +12,7 @@ export const volunteersRouter = createTRPCRouter({
 			phoneNumber: z.string().optional(),
 			notes: z.string().optional(),
 			profilePictureUrl: z.string().optional(),
-			categories: z.string().array()
+			filters: z.string().array()
 		}))
 		.mutation(async ({ ctx, input }) => {
 			const { id: userId, lastOrganizationId } = ctx.session.user;
@@ -35,13 +35,9 @@ export const volunteersRouter = createTRPCRouter({
 					url: randomId({ prefix: input.name.split(' ').join('-'), length: 4 }),
 				});
 
-			const categoriesAndVolunteersRows = input.categories.map(cat => ({
-				categoryId: cat,
-				volunteerId
-			}));
-			console.log({ categoriesAndVolunteersRows });
+			const categoriesAndVolunteersRows = input.filters.map(filterId => ({ filterId, volunteerId }));
 			await ctx.db
-				.insert(categoriesAndVolunteers)
+				.insert(filtersAndVolunteers)
 				.values(categoriesAndVolunteersRows)
 		})
 })

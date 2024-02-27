@@ -23,7 +23,7 @@ import {
 } from "~/types";
 import { CategoriesArea } from "./categoriesArea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { CardHeader, CardTitle } from "~/components/ui/card";
 
 type VolunteerFormProps = {
 	categories: category[],

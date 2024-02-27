@@ -123,7 +123,7 @@ export const organizations = createTable('organizations', {
 
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   organizationsAndUsers: many(organizationsAndUsers),
-  categories: many(categories)
+  filters: many(filters)
 }))
 
 export const organizationsAndUsers = createTable('organizations_and_users', {
@@ -183,39 +183,42 @@ export const volunteersRelations = relations(volunteers, ({ one, many }) => ({
     fields: [volunteers.createdBy],
     references: [users.id]
   }),
-  categories: many(categoriesAndVolunteers)
+  filters: many(filtersAndVolunteers)
 }));
 
-/* ------------------------------------------------- Categories ----------------------------------------------------- */
-export const categories = createTable('categories', {
+/* -------------------------------------------------- Filters ------------------------------------------------------- */
+export const filtersEnum = pgEnum('filters', [ 'category', 'tag' ])
+
+export const filters = createTable('filters', {
   id: varchar('id', { length: 255 }).primaryKey(),
   urlId: varchar('url_id').notNull().unique(),
   name: varchar('name').notNull(),
+  filterType: filtersEnum('filter_type').notNull(),
   organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id, { onDelete: 'cascade'})
 });
 
-export const categoriesRelations = relations(categories, ({ one, many }) => ({
-  volunteers: many(categoriesAndVolunteers),
+export const filtersRelations = relations(filters, ({ one, many }) => ({
+  volunteers: many(filtersAndVolunteers),
   organizations: one(organizations, {
-    fields: [categories.organizationId],
+    fields: [filters.organizationId],
     references: [organizations.id]
   }),
 }));
 
-export const categoriesAndVolunteers = createTable('categories_and_volunteers', {
-  categoryId: varchar('category_id', { length: 255 }).notNull().references(() => categories.id, { onDelete: 'cascade'}),
+export const filtersAndVolunteers = createTable('filters_and_volunteers', {
+  filterId: varchar('filter_id', { length: 255 }).notNull().references(() => filters.id, { onDelete: 'cascade'}),
   volunteerId: varchar('volunteer_id', { length: 255 }).notNull().references(() => volunteers.id, { onDelete: 'cascade' })
 }, (t) => ({
-  pk: primaryKey({ columns: [t.categoryId, t.volunteerId] })
+  pk: primaryKey({ columns: [t.filterId, t.volunteerId] })
 }));
 
-export const categoriesAndVolunteersRelations = relations(categoriesAndVolunteers, ({ one }) => ({
+export const filtersAndVolunteersRelations = relations(filtersAndVolunteers, ({ one }) => ({
   volunteer: one(volunteers, {
-    fields: [categoriesAndVolunteers.volunteerId],
+    fields: [filtersAndVolunteers.volunteerId],
     references: [volunteers.id]
   }),
-  category: one(categories, {
-    fields: [categoriesAndVolunteers.categoryId],
-    references: [categories.id]
+  filter: one(filters, {
+    fields: [filtersAndVolunteers.filterId],
+    references: [filters.id]
   })
-}))
+}));
