@@ -3,7 +3,7 @@ import { organizationsRouter } from "./routers/organizations";
 import { usersRouter } from "./routers/users";
 import { invitesRouter } from "./routers/invites";
 import { volunteersRouter } from "./routers/volunteers";
-import { categoriesRouter } from "./routers/categories";
+import { categoriesRouter } from "./routers/filters";
 
 /**
  * This is the primary router for your server.

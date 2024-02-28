@@ -5,7 +5,7 @@ import { api } from "~/trpc/server";
 
 export default async function AddVolunteerPage() {
 	await verifyUser({ callbackUrl: '/add-volunteer' });
-	const { categories, permission } = await api.organizations.getCurrentOrganization.query();
+	const { filters, permission } = await api.organizations.getCurrentOrganization.query();
 
 	return (
 		<div className="h-screen w-full flex justify-center overflow-auto py-3">
@@ -15,7 +15,7 @@ export default async function AddVolunteerPage() {
 				</CardHeader>
 				<CardContent>
 					<AddVolunteersForm 
-						categories={categories.map(c => ({ ...c, defaultChecked: false }))}
+						categories={filters.map(c => ({ ...c, defaultChecked: false }))}
 						admin={permission === 'admin'}
 					/>
 				</CardContent>
