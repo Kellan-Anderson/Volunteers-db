@@ -5,7 +5,7 @@ import { filters } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
 
 export const categoriesRouter = createTRPCRouter({
-	addCategory: protectedProcedure
+	addFilter: protectedProcedure
 		.input(z.object({
 			name: z.string(),
 			filterType: z.enum([ 'category', 'tag' ])
@@ -42,6 +42,22 @@ export const categoriesRouter = createTRPCRouter({
 				)
 			});
 			return organizationsCategories.map(cat => ({
+				urlId: cat.urlId,
+				name: cat.name
+			}));
+		}),
+
+	getTags: protectedProcedure
+		.query(async ({ ctx }) => {
+			const { lastOrganizationId } = ctx.session.user;
+			if(!lastOrganizationId) throw new Error('User has not setup/joined an organization');
+			const organizationsTags = await ctx.db.query.filters.findMany({
+				where: and(
+					eq(filters.organizationId, lastOrganizationId),
+					eq(filters.filterType, 'tag')
+				)
+			});
+			return organizationsTags.map(cat => ({
 				urlId: cat.urlId,
 				name: cat.name
 			}));

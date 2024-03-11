@@ -2,11 +2,11 @@ import type { Control } from "react-hook-form"
 import { z } from "zod"
 
 /* ---------------------------------------------------- Types ------------------------------------------------------- */
-export type category = {
+export type filter = {
 	id: string,
 	name: string,
 	urlId: string,
-	defaultChecked: boolean
+	selected: boolean
 }
 
 
@@ -21,5 +21,6 @@ export const volunteersParser = z.object({
 	email: z.string().min(1, 'Email is required').email('Please enter a valid email'),
 	phoneNumber: z.string().optional(),
 	notes: z.string().optional(),
-	categories: z.array(z.string())
+	categories: z.array(z.string()),
+	tags: z.string().array(),
 });
