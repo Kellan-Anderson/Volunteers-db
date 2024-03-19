@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
 	type SubmitHandler,
+	type SubmitErrorHandler,
 	useForm,
 } from "react-hook-form";
 import type { z } from "zod";
@@ -18,21 +19,22 @@ import { uploadFiles } from "~/lib/uploadthing";
 import { api } from "~/trpc/react";
 import {
 	type FormAreaProps,
-	type category,
+	type filterRow,
 	volunteersParser,
 } from "~/types";
-import { CategoriesArea } from "./categoriesArea";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion";
-import { CardHeader, CardTitle } from "~/components/ui/card";
+import { Filters } from "./filters";
+import { useAppSelector } from "~/redux/reduxHooks";
 
 type VolunteerFormProps = {
-	categories: category[],
+	filters: filterRow[]
 	admin?: boolean
 }
 
-export function AddVolunteersForm({ categories, admin=false } : VolunteerFormProps) {
+export function AddVolunteersForm({ filters, admin=false } : VolunteerFormProps) {
 	const [loading, setLoading] = useState(false);
 	const [profilePicture, setProfilePicture] = useState<File | undefined>();
+
+	const { categories, tags } = useAppSelector(state => state.filters)
 
 	const router = useRouter();
 	const { mutate } = api.volunteers.addVolunteer.useMutation({
@@ -45,8 +47,7 @@ export function AddVolunteersForm({ categories, admin=false } : VolunteerFormPro
 			email: '',
 			name: '',
 			notes: '',
-			phoneNumber: '',
-			categories: categories.filter(cat => cat.defaultChecked).map(cat => cat.id),
+			phoneNumber: ''
 		},
 		resolver: zodResolver(volunteersParser)
 	});
@@ -60,9 +61,16 @@ export function AddVolunteersForm({ categories, admin=false } : VolunteerFormPro
 		}
 		mutate({
 			...values,
+			filters: [
+				...tags.filter(t => t.selected),
+				...categories.filter(c => c.selected)
+			],
 			profilePictureUrl
 		});
-		// console.log({values})
+	}
+
+	const onAddVolunteerError: SubmitErrorHandler<z.infer<typeof volunteersParser>> = (values) => {
+		console.error({values})
 	}
 
 	return (
@@ -76,25 +84,18 @@ export function AddVolunteersForm({ categories, admin=false } : VolunteerFormPro
 						onChange={(e) => setProfilePicture(e.target.files?.item(0) ?? undefined)}
 						/>
 				</div>
-				<CardHeader className="p-0 pt-6">
-					<CardTitle className="font-bold">Extras</CardTitle>
-				</CardHeader>
-				<Accordion type="multiple">
-					<AccordionItem value="categories">
-						<AccordionTrigger>Categories</AccordionTrigger>
-						<AccordionContent>
-							<CategoriesArea categories={categories} control={form.control} admin={admin} />
-						</AccordionContent>
-					</AccordionItem>
-				</Accordion>				
-				<Button
-					type="button"
-					className="w-full mt-3"
-					onClick={() => form.handleSubmit(onAddVolunteerSubmit)()}
-				>
-					{loading ? <Loader2 className="text-blue-500 animate-spin" /> : "Submit"}
-				</Button>
 			</form>
+			
+			<h1 className="text-lg font-bold pt-6">Extras</h1>
+			<Filters filters={filters} admin={admin} />
+			
+			<Button
+				type="button"
+				className="w-full mt-3"
+				onClick={() => form.handleSubmit(onAddVolunteerSubmit, onAddVolunteerError)()}
+			>
+				{loading ? <Loader2 className="text-blue-500 animate-spin" /> : "Submit"}
+			</Button>
 		</Form>
 	);
 }

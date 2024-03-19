@@ -11,13 +11,10 @@ export default async function AddVolunteerPage() {
 		<div className="h-screen w-full flex justify-center overflow-auto py-3">
 			<Card className="w-1/2 h-fit">
 				<CardHeader>
-					<CardTitle className="font-bold">Add a volunteer</CardTitle>
+					<CardTitle className="font-bold text-lg">Add a volunteer</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<AddVolunteersForm 
-						categories={filters.map(c => ({ ...c, defaultChecked: false }))}
-						admin={permission === 'admin'}
-					/>
+					<AddVolunteersForm filters={filters} admin={permission === 'admin'} />
 				</CardContent>
 			</Card>
 		</div>

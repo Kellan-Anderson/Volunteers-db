@@ -1,22 +1,55 @@
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
-import type { filter } from "~/types";
+import type { filter, filterRow } from "~/types";
 
-const initialState: filter[] = []
+type filterState = {
+  categories: filter[],
+  tags: filter[],
+  loading: boolean
+}
 
-export const tagSlice = createSlice({
+const initialState: filterState = {
+  categories: [],
+  tags: [],
+  loading: true
+};
+
+const filterSlice = createSlice({
   initialState,
-  name: "tagSlice",
+  name: 'filters',
   reducers: {
-    setAllTags: (_state, action: PayloadAction<filter[]>) => {
-      return action.payload;
+    setAddVolunteerFilters: (_, action: PayloadAction<filterRow[]>) => {
+      const categories: filter[] = [];
+      const tags: filter[] = [];
+      action.payload.forEach(filter => {
+        if(filter.filterType === 'category') {
+          categories.push({ ...filter, selected: false })
+        } else {
+          tags.push({ ...filter, selected: false })
+        }
+      })
+      return {
+        categories,
+        tags,
+        loading: false
+      };
     },
-    toggleTag: (state, action: PayloadAction<{id: string}>) => {
+
+    toggleSelection: (state, action: PayloadAction<{id: string}>) => {
       const { id } = action.payload;
-      return state.map(tag => ({
-        ...tag,
-        selected: tag.id === id ? !tag.selected : tag.selected
-      }))
+      const categories = state.categories.map(c => ({ ...c, selected: c.id === id ? !c.selected : c.selected }))
+      const tags = state.tags.map(t => ({ ...t, selected: t.id === id ? !t.selected : t.selected }))
+      return { ...state, categories, tags }
     },
-    addTag: (state, action: PayloadAction<filter>) => [...state, action.payload]
+
+    addCategory: (state, action: PayloadAction<filter>) => {
+      state.categories.push(action.payload);
+    },
+
+    addTag: (state, action: PayloadAction<filter>) => {
+      state.tags.push(action.payload)
+    }
   }
-});
+})
+
+export const { addCategory, addTag, setAddVolunteerFilters, toggleSelection } = filterSlice.actions;
+export default filterSlice.reducer

@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { filters } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
 
-export const categoriesRouter = createTRPCRouter({
+export const filterRouter = createTRPCRouter({
 	addFilter: protectedProcedure
 		.input(z.object({
 			name: z.string(),
@@ -19,16 +19,19 @@ export const categoriesRouter = createTRPCRouter({
 					eq(filters.name, input.name)
 				)
 			});
-			if(existingFilter !== undefined) throw new Error('That category already exists');
+			if(existingFilter !== undefined) throw new Error('That filter already exists');
+			const filter = {
+				id: `${input.filterType}-${crypto.randomUUID()}`,
+				urlId: randomId({ prefix: input.name.split(' ').join('-'), length: 4 }),
+				organizationId: lastOrganizationId,
+				name: input.name,
+				filterType: input.filterType
+			}
 			await ctx.db
 				.insert(filters)
-				.values({
-					id: `category-${crypto.randomUUID()}`,
-					urlId: randomId({ prefix: input.name.split(' ').join('-'), length: 4 }),
-					organizationId: lastOrganizationId,
-					name: input.name,
-					filterType: input.filterType
-				});
+				.values(filter);
+
+			return filter;
 		}),
 
 	getCategories: protectedProcedure
