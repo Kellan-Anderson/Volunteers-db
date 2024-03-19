@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { and, eq } from "drizzle-orm";
-import { filtersAndVolunteers, volunteers } from "~/server/db/schema";
+import { and, eq, sql } from "drizzle-orm";
+import { filters, filtersAndVolunteers, volunteers } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
 import { filtersParser } from "~/types";
 
@@ -47,5 +47,29 @@ export const volunteersRouter = createTRPCRouter({
 				volunteerId
 			} : []);
 			await ctx.db.insert(filtersAndVolunteers).values(filterRows);
+		}),
+
+	getVolunteers: protectedProcedure
+		.query(async ({ ctx }) => {
+			// Check to make sure that the user that is trying to add a volunteer has setup or joined and organization
+			const { lastOrganizationId } = ctx.session.user;
+			if(!lastOrganizationId) throw new Error('User has not joined/setup organization');
+
+			const organizationVolunteers = await ctx.db
+				.select()
+				.from(filtersAndVolunteers)
+				.rightJoin(volunteers, eq(filtersAndVolunteers.volunteerId, volunteers.id))
+				.leftJoin(filters, eq(filtersAndVolunteers.filterId, filters.id))
+				.where(eq(volunteers.organizationId, lastOrganizationId))
+
+			const reducedVolunteers = organizationVolunteers.flatMap((vol, i) => {
+				const index = organizationVolunteers.findIndex(row => row.volunteers.id === vol.volunteers.id);
+				if(index === i) {
+					return vol.volunteers
+				}
+				return []
+			});
+
+			return reducedVolunteers
 		})
 })
