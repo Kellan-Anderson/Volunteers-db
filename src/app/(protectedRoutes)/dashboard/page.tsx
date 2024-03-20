@@ -9,9 +9,11 @@ type DashboardPageProps = {
 
 export default async function DashboardPage({ searchParams } : DashboardPageProps) {
 	const searchQuery = [searchParams.query].flat().at(0);
+	const filters = [searchParams.filterBy ?? []].flat();
 
 	const volunteers = await api.volunteers.getVolunteers.query({
-		query: searchQuery
+		query: searchQuery,
+		filterUrlIds: filters
 	});
 
 	return (

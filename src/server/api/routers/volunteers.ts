@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { type SQL, and, eq, sql } from "drizzle-orm";
+import { type SQL, and, eq, sql, inArray } from "drizzle-orm";
 import { filters, filtersAndVolunteers, volunteers } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
 import { filtersParser } from "~/types";
@@ -51,7 +51,8 @@ export const volunteersRouter = createTRPCRouter({
 
 	getVolunteers: protectedProcedure
 		.input(z.object({
-			query: z.string().optional()
+			query: z.string().optional(),
+			filterUrlIds: z.string().array()
 		}))
 		.query(async ({ ctx, input }) => {
 			// Check to make sure that the user that is trying to add a volunteer has setup or joined and organization
@@ -62,6 +63,9 @@ export const volunteersRouter = createTRPCRouter({
 
 			if(input.query) {
 				queryArray.push(sql`to_tsvector('simple', ${volunteers.name}) @@ plainto_tsquery('simple', ${input.query})`)
+			}
+			if(input.filterUrlIds.length > 0) {
+				queryArray.push(inArray(filters.urlId, input.filterUrlIds))
 			}
 
 			const organizationVolunteers = await ctx.db
