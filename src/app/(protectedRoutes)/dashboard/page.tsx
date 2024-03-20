@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/server";
+import { SearchBar } from "./_dashboardComponents/searchBar";
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+	searchParams: Record<string, string>
+}
 
-	const volunteers = await api.volunteers.getVolunteers.query();
+export default async function DashboardPage({ searchParams } : DashboardPageProps) {
+	const searchQuery = [searchParams.query].flat().at(0);
+
+	const volunteers = await api.volunteers.getVolunteers.query({
+		query: searchQuery
+	});
 
 	return (
 		<>
@@ -12,6 +20,7 @@ export default async function DashboardPage() {
 				<h1 className="font-bold text-lg">Volunteers</h1>
 				<AddVolunteerButton />
 			</header>
+			<SearchBar />
 			{volunteers.map((v, i) => <div className="border border-b" key={i}>{JSON.stringify(v, null, 2)}</div>)}
 		</>
 	);
