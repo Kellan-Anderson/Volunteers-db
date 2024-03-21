@@ -64,5 +64,14 @@ export const filterRouter = createTRPCRouter({
 				urlId: cat.urlId,
 				name: cat.name
 			}));
+		}),
+
+	getAllFilters: protectedProcedure
+		.query(async ({ ctx }) => {
+			const { lastOrganizationId } = ctx.session.user;
+			if(!lastOrganizationId) throw new Error('User has not setup/joined an organization');
+
+			const allFilters = await ctx.db.query.filters.findMany({ where: eq(filters.organizationId, lastOrganizationId)})
+			return allFilters
 		})
 })
