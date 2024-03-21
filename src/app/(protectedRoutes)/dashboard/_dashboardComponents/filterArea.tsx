@@ -1,8 +1,11 @@
 'use client'
 
 import { useSearchParams } from "next/navigation"
+import { useState } from "react"
 import { Checkbox } from "~/components/ui/checkbox"
+import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
+import { Toggle } from "~/components/ui/toggle"
 import { useUrlState } from "~/hooks/useUrlState"
 import type { filter, filterRow } from "~/types"
 
@@ -30,17 +33,21 @@ export function FilterArea({ allFilters } : FilterAreaProps) {
     }));
 
   return (
-    <div className="flex flex-col w-72 p-2">
+    <div className="flex flex-col w-80 p-2">
       <h1 className="font-bold text-lg">Filter and sort</h1>
       <section id="categories">
         <h1 className="py-1">Categories</h1>
-        <CategoriesFilters filters={categoryFilters} />
+        <CategoryFilters filters={categoryFilters} />
+      </section>
+      <section id="tags">
+        <h1 className="py-1">Tags</h1>
+        <TagFilters filters={tagFilters} />
       </section>
     </div>
   );
 }
 
-function CategoriesFilters({ filters } : FilterProps) {
+function CategoryFilters({ filters } : FilterProps) {
   const { pushUrlItem, removeItem } = useUrlState('filterBy')
   return (
     <div className="flex flex-col gap-1">
@@ -54,6 +61,36 @@ function CategoriesFilters({ filters } : FilterProps) {
           <Label htmlFor={f.id}>{f.name}</Label>
         </div>
       ))}
+    </div>
+  );
+}
+
+function TagFilters({ filters } : FilterProps) {
+  const { pushUrlItem, removeItem } = useUrlState('filterBy');
+  const [tagQuery, setTagQuery] = useState('');
+  const queriedFilters = tagQuery === '' 
+    ? filters 
+    : filters.filter(f => f.name.toLowerCase().startsWith(tagQuery.toLowerCase()));
+
+  return (
+    <div className="flex flex-col w-full">
+      <Input
+        value={tagQuery}
+        onChange={e => setTagQuery(e.target.value)}
+        placeholder="Search for tag"
+      />
+      <div className="flex flex-wrap gap-1.5 pt-2">
+        {queriedFilters.map(f => (
+          <Toggle
+            key={f.id}
+            defaultPressed={f.selected}
+            onPressedChange={pressed => pressed ? pushUrlItem(f.urlId) : removeItem(f.urlId)}
+            className="border"
+          >
+            {f.name}
+          </Toggle>
+        ))}
+      </div>
     </div>
   );
 }
