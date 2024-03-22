@@ -32,6 +32,7 @@ export function Filters({ filters, admin=false } : filtersProps) {
 
   useEffect(() => {
     dispatch(setAddVolunteerFilters(filters))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

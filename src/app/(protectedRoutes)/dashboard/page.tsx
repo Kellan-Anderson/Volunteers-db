@@ -3,6 +3,7 @@ import { Button } from "~/components/ui/button";
 import { api } from "~/trpc/server";
 import { SearchBar } from "./_dashboardComponents/searchBar";
 import { FilterArea } from "./_dashboardComponents/filterArea";
+import { sortByParser } from "~/types";
 
 type DashboardPageProps = {
 	searchParams: Record<string, string>
@@ -11,10 +12,14 @@ type DashboardPageProps = {
 export default async function DashboardPage({ searchParams } : DashboardPageProps) {
 	const searchQuery = [searchParams.query].flat().at(0);
 	const urlFilters = [searchParams.filterBy ?? []].flat();
+	const sortingOrder = [searchParams.sortBy].flat().at(0);
+
+	const verifiedSortingSelection = sortByParser.safeParse(sortingOrder);
 
 	const volunteers = await api.volunteers.getVolunteers.query({
 		query: searchQuery,
-		filterUrlIds: urlFilters
+		filterUrlIds: urlFilters,
+		sortBy: verifiedSortingSelection.success ? verifiedSortingSelection.data : undefined
 	});
 
 	const filters = await api.filters.getAllFilters.query();

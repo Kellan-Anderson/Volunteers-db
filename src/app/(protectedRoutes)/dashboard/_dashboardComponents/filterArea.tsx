@@ -36,11 +36,11 @@ export function FilterArea({ allFilters } : FilterAreaProps) {
     <div className="flex flex-col w-80 p-2">
       <h1 className="font-bold text-lg">Filter and sort</h1>
       <section id="categories">
-        <h1 className="py-1">Categories</h1>
+        <h1 className="py-1 font-semibold">Categories</h1>
         <CategoryFilters filters={categoryFilters} />
       </section>
       <section id="tags">
-        <h1 className="py-1">Tags</h1>
+        <h1 className="py-1 font-semibold">Tags</h1>
         <TagFilters filters={tagFilters} />
       </section>
     </div>

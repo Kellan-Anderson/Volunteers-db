@@ -31,4 +31,6 @@ export const filtersParser = z.object({
 	name: z.string(),
 	urlId: z.string(),
 	selected: z.boolean()
-})
+});
+
+export const sortByParser = z.enum([ 'name-asc', 'name-desc', 'created-at-asc', 'created-at-desc' ]);

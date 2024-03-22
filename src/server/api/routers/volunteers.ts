@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { type SQL, and, eq, sql, inArray } from "drizzle-orm";
+import { type SQL, and, eq, sql, inArray, asc, desc } from "drizzle-orm";
 import { filters, filtersAndVolunteers, volunteers } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
-import { filtersParser } from "~/types";
+import { filtersParser, sortByParser } from "~/types";
 
 export const volunteersRouter = createTRPCRouter({
 	addVolunteer: protectedProcedure
@@ -52,7 +52,8 @@ export const volunteersRouter = createTRPCRouter({
 	getVolunteers: protectedProcedure
 		.input(z.object({
 			query: z.string().optional(),
-			filterUrlIds: z.string().array()
+			filterUrlIds: z.string().array(),
+			sortBy: sortByParser.default('name-asc')
 		}))
 		.query(async ({ ctx, input }) => {
 			// Check to make sure that the user that is trying to add a volunteer has setup or joined and organization
@@ -74,6 +75,7 @@ export const volunteersRouter = createTRPCRouter({
 				.rightJoin(volunteers, eq(filtersAndVolunteers.volunteerId, volunteers.id))
 				.leftJoin(filters, eq(filtersAndVolunteers.filterId, filters.id))
 				.where(and(...queryArray))
+				.orderBy(getSortingOrder(input.sortBy))
 
 			const reducedVolunteers = organizationVolunteers.flatMap((vol, i) => {
 				const index = organizationVolunteers.findIndex(row => row.volunteers.id === vol.volunteers.id);
@@ -85,4 +87,17 @@ export const volunteersRouter = createTRPCRouter({
 
 			return reducedVolunteers
 		})
-})
+});
+
+function getSortingOrder(order: z.infer<typeof sortByParser>) {
+	switch(order) {
+		case 'name-asc':
+			return asc(volunteers.name)
+		case 'name-desc':
+			return desc(volunteers.name)
+		case 'created-at-asc':
+			return asc(volunteers.createdAt)
+		case 'created-at-desc':
+			return desc(volunteers.createdAt)
+	}
+}
