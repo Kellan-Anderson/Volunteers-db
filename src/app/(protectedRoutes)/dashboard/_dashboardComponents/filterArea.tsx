@@ -57,7 +57,7 @@ export function FilterArea({ allFilters } : FilterAreaProps) {
 }
 
 function CategoryFilters({ filters } : FilterProps) {
-  const { pushUrlItem, removeItem } = useUrlState('filterBy')
+  const { pushItem: pushUrlItem, removeItem } = useUrlState('filterBy')
   return (
     <div className="flex flex-col gap-1">
       {filters.map(f => (
@@ -75,7 +75,7 @@ function CategoryFilters({ filters } : FilterProps) {
 }
 
 function TagFilters({ filters } : FilterProps) {
-  const { pushUrlItem, removeItem } = useUrlState('filterBy');
+  const { pushItem: pushUrlItem, removeItem } = useUrlState('filterBy');
   const [tagQuery, setTagQuery] = useState('');
   const queriedFilters = tagQuery === '' 
     ? filters 

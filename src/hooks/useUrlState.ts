@@ -10,11 +10,9 @@ export function useUrlState(selector: string) {
 
   const pushUrl = () => router.push(`${pathname}?${searchParams.toString()}`);
 
-  const pushUrlItem = (item: string) => {
-    if(!searchParams.has(selector, item)) {
-      searchParams.append(selector, item)
-      pushUrl();
-    }
+  const pushItem = (item: string) => {
+    searchParams.set(selector, item)
+    pushUrl();
   }
 
   const removeItem = (item: string) => {
@@ -22,7 +20,7 @@ export function useUrlState(selector: string) {
     pushUrl();
   }
 
-  const pushSingleItem = (item: string) => {
+  const appendItem = (item: string) => {
     if(searchParams.has(selector)) {
       searchParams.set(selector, item)
     } else {
@@ -37,5 +35,5 @@ export function useUrlState(selector: string) {
     pushUrl();
   }
 
-  return { pushSingleItem, pushUrlItem, removeItem, replaceItem }
+  return { appendItem, pushItem, removeItem, replaceItem }
 }

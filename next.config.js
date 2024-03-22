@@ -9,6 +9,7 @@ const config = {
 	images: {
 		domains: [
 			'images.unsplash.com', // Used for testing
+			'utfs.io'
 		]
 	}
 };

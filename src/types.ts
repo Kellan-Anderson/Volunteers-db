@@ -1,6 +1,6 @@
 import type { Control } from "react-hook-form"
 import { z } from "zod"
-import { type filters } from "./server/db/schema"
+import type { volunteers, filters } from "./server/db/schema"
 import type { InferSelectModel } from "drizzle-orm"
 
 /* ---------------------------------------------------- Types ------------------------------------------------------- */
@@ -11,7 +11,9 @@ export type filter = {
 	selected: boolean
 }
 
-export type filterRow = InferSelectModel<typeof filters>
+export type filterRow = InferSelectModel<typeof filters>;
+
+export type volunteerRow = InferSelectModel<typeof volunteers>;
 
 /* ---------------------------------------------------- Props ------------------------------------------------------- */
 export type FormAreaProps = {

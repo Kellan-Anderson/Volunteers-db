@@ -4,6 +4,7 @@ import { api } from "~/trpc/server";
 import { SearchBar } from "./_dashboardComponents/searchBar";
 import { FilterArea } from "./_dashboardComponents/filterArea";
 import { sortByParser } from "~/types";
+import { VolunteerRow } from "./_dashboardComponents/volunteerRow";
 
 type DashboardPageProps = {
 	searchParams: Record<string, string>
@@ -16,13 +17,12 @@ export default async function DashboardPage({ searchParams } : DashboardPageProp
 
 	const verifiedSortingSelection = sortByParser.safeParse(sortingOrder);
 
+	const { filters, permission } = await api.organizations.getCurrentOrganization.query();
 	const volunteers = await api.volunteers.getVolunteers.query({
 		query: searchQuery,
 		filterUrlIds: urlFilters,
 		sortBy: verifiedSortingSelection.success ? verifiedSortingSelection.data : undefined
 	});
-
-	const filters = await api.filters.getAllFilters.query();
 
 	return (
 		<>
@@ -32,8 +32,8 @@ export default async function DashboardPage({ searchParams } : DashboardPageProp
 			</header>
 			<SearchBar />
 			<div className="flex flex-row w-full">
-				<section className="border border-black grow">
-					{volunteers.map((v, i) => <div className="border border-b" key={i}>{v.name}</div>)}
+				<section className="grow">
+					{volunteers.map((v, i) => <VolunteerRow admin={permission === 'admin'} volunteer={v} key={i}/>)}
 				</section>
 				<FilterArea allFilters={filters} />
 			</div>
