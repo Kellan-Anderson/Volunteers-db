@@ -1,13 +1,16 @@
 'use client'
 
+import { ArrowDown, ArrowUp } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
+import { type z } from "zod"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { Toggle } from "~/components/ui/toggle"
 import { useUrlState } from "~/hooks/useUrlState"
-import type { filter, filterRow } from "~/types"
+import { type filter, type filterRow, sortByParser } from "~/types"
 
 type FilterAreaProps = {
   allFilters: filterRow[],
@@ -19,6 +22,8 @@ type FilterProps = {
 
 export function FilterArea({ allFilters } : FilterAreaProps) {
   const params = useSearchParams();
+  const sortByValue = sortByParser.safeParse(params.get('sortBy'))
+
   const categoryFilters: filter[] = allFilters
     .filter(f => f.filterType === 'category')
     .map(f => ({
@@ -35,11 +40,15 @@ export function FilterArea({ allFilters } : FilterAreaProps) {
   return (
     <div className="flex flex-col w-80 p-2">
       <h1 className="font-bold text-lg">Filter and sort</h1>
-      <section id="categories">
+      <section id="sortBy">
+        <h1 className="py-1 font-semibold">Sort By</h1>
+        <SortingSelector defaultValue={sortByValue.success ? sortByValue.data : undefined} />
+      </section>
+      <section id="categories" className="pt-2.5">
         <h1 className="py-1 font-semibold">Categories</h1>
         <CategoryFilters filters={categoryFilters} />
       </section>
-      <section id="tags">
+      <section id="tags" className="pt-2.5">
         <h1 className="py-1 font-semibold">Tags</h1>
         <TagFilters filters={tagFilters} />
       </section>
@@ -92,5 +101,47 @@ function TagFilters({ filters } : FilterProps) {
         ))}
       </div>
     </div>
+  );
+}
+
+type SortingSelectorProps = {
+  defaultValue?: z.infer<typeof sortByParser>
+}
+
+function SortingSelector({ defaultValue='name-asc' } : SortingSelectorProps) {
+  const { replaceItem } = useUrlState('sortBy');
+
+  return (
+    <Select defaultValue={defaultValue} onValueChange={(value) => replaceItem(value)}>
+      <SelectTrigger>
+        <SelectValue placeholder="Sort by..." />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="name-asc">
+          <div className="flex flex-row gap-1 items-center">
+            <ArrowDown className="h-4 w-4"/>
+            Name
+          </div>
+        </SelectItem>
+        <SelectItem value="name-desc">
+          <div className="flex flex-row gap-1 items-center">
+            <ArrowUp className="h-4 w-4" />
+            Name
+          </div>
+        </SelectItem>
+        <SelectItem value="created-at-asc">
+          <div className="flex flex-row gap-1 items-center">
+            <ArrowDown className="h-4 w-4" />
+            Created At
+          </div>
+        </SelectItem>
+        <SelectItem value="created-at-dec">
+          <div className="flex flex-row gap-1 items-center">
+            <ArrowUp className="h-4 w-4" />
+            CreatedAt
+          </div>
+        </SelectItem>
+      </SelectContent>
+    </Select>
   );
 }

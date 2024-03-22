@@ -31,5 +31,11 @@ export function useUrlState(selector: string) {
     pushUrl();
   }
 
-  return { pushSingleItem, pushUrlItem, removeItem }
+  const replaceItem = (item: string) => {
+    searchParams.delete(selector);
+    searchParams.set(selector, item);
+    pushUrl();
+  }
+
+  return { pushSingleItem, pushUrlItem, removeItem, replaceItem }
 }
