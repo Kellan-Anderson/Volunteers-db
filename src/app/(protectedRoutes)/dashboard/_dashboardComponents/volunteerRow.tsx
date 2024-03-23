@@ -9,6 +9,9 @@ import { Button } from "~/components/ui/button";
 import { useUrlState } from "~/hooks/useUrlState";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { useState } from "react";
+import { api } from "~/trpc/react";
+import { useRouter } from "next/navigation";
+import { Loader } from "~/components/ui/loader";
 
 dayjs.extend(relativeTime);
 
@@ -19,7 +22,14 @@ type VolunteerRowProps = {
 
 export function VolunteerRow({ admin=false, volunteer } : VolunteerRowProps) {
   const { pushItem } = useUrlState('volunteer');
+  const router = useRouter()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { mutate, isLoading } = api.volunteers.deleteVolunteer.useMutation({
+    onSuccess: () => {
+      setDeleteDialogOpen(false);
+      router.refresh();
+    }
+  });
 
   return (
     <>
@@ -57,21 +67,28 @@ export function VolunteerRow({ admin=false, volunteer } : VolunteerRowProps) {
             <DialogTitle>Are you sure you want to delete {volunteer.name}?</DialogTitle>
             <DialogDescription>This action cannot be undone</DialogDescription>
           </DialogHeader>
-          <div className="flex flex-row gap-1 w-full">
-            <Button
-              variant="secondary"
-              onClick={() => setDeleteDialogOpen(false)}
-              className="grow"
-            >
-              Cancel
+          {isLoading ? (
+            <Button disabled>
+              <Loader />
             </Button>
-            <Button
-              variant="destructive"
-              className="grow"
-            >
-              Delete
-            </Button>
-          </div>
+          ) : (
+            <div className="flex flex-row gap-1 w-full">
+              <Button
+                variant="secondary"
+                onClick={() => setDeleteDialogOpen(false)}
+                className="grow"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                className="grow"
+                onClick={() => mutate({ volunteerId: volunteer.id })}
+              >
+                Delete
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
@@ -87,7 +104,7 @@ type CRUDButtonProps = {
 
 function CRUDButtons({ admin, onDeleteClick, onEditClick, onMoreClick } : CRUDButtonProps) {
   return (
-    <div className="flex-row gap-1 items-center hidden group-hover:flex pr-2" id="crud-buttons">
+    <div className="flex-row gap-1 items-center md:hidden md:group-hover:flex flex pr-2" id="crud-buttons">
       {admin && (
         <>
           <Button

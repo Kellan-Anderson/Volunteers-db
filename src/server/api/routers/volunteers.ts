@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { type SQL, and, eq, sql, inArray, asc, desc } from "drizzle-orm";
-import { filters, filtersAndVolunteers, volunteers } from "~/server/db/schema";
+import { filters, filtersAndVolunteers, organizationsAndUsers, volunteers } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
 import { filtersParser, sortByParser } from "~/types";
 
@@ -86,7 +86,31 @@ export const volunteersRouter = createTRPCRouter({
 			});
 
 			return reducedVolunteers
-		})
+		}),
+
+		deleteVolunteer: protectedProcedure
+			.input(z.object({
+				volunteerId: z.string()
+			}))
+			.mutation(async ({ ctx, input }) => {
+				const { lastOrganizationId } = ctx.session.user;
+				if(!lastOrganizationId) throw new Error('User has not joined/setup organization');
+
+				const userPermission = await ctx.db.query.organizationsAndUsers.findFirst({
+					where: and(
+						eq(organizationsAndUsers.userId, ctx.session.user.id),
+						eq(organizationsAndUsers.organizationId, lastOrganizationId)
+					)
+				});
+
+				if(userPermission?.permission !== 'admin') {
+					throw new Error('User does not have permission to delete volunteers')
+				}
+
+				await ctx.db
+					.delete(volunteers)
+					.where(eq(volunteers.id, input.volunteerId))
+			})
 });
 
 function getSortingOrder(order: z.infer<typeof sortByParser>) {
