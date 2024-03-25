@@ -34,7 +34,7 @@ export function VolunteerRow({ admin=false, volunteer } : VolunteerRowProps) {
   return (
     <>
       <div className="odd:bg-zinc-300/50 flex flex-row justify-between h-12 group">
-        <div className="flex flex-row gap-1 items-center pl-2">
+        <div className="flex flex-row gap-1 items-center pl-2 cursor-pointer" onClick={() => pushItem(volunteer.url)}>
           <div className="relative h-10 w-10 rounded-full overflow-hidden bg-zinc-600 flex justify-center items-center">
             {volunteer.profilePictureUrl ? (
               <Image

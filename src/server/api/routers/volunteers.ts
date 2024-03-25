@@ -110,6 +110,43 @@ export const volunteersRouter = createTRPCRouter({
 				await ctx.db
 					.delete(volunteers)
 					.where(eq(volunteers.id, input.volunteerId))
+			}),
+
+		getVolunteerInformation: protectedProcedure
+			.input(z.object({
+				volunteerUrl: z.string()
+			}))
+			.query(async ({ ctx, input }) => {
+				const volunteer = await ctx.db.query.volunteers.findFirst({
+					where: eq(volunteers.url, input.volunteerUrl),
+					with: {
+						filters: {
+							with: {
+								filter: true
+							}
+						},
+						createdBy: true,
+					}
+				});
+
+				if(!volunteer) {
+					throw new Error('That volunteer does not exist')
+				}
+				return {
+					id: volunteer.id,
+					name: volunteer.name,
+					email: volunteer.email,
+					createdBy: {
+						name: volunteer.createdBy.name,
+						id: volunteer.createdBy.id
+					},
+					url: volunteer.url,
+					phoneNumber: volunteer.phoneNumber,
+					notes: volunteer.notes,
+					createdAt: volunteer.createdAt,
+					profilePictureUrl: volunteer.profilePictureUrl,
+					activeFilters: volunteer.filters.map(f => f.filter)
+				}
 			})
 });
 
