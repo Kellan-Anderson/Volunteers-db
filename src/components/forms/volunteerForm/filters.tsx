@@ -24,14 +24,15 @@ import { useAppDispatch, useAppSelector } from "~/redux/reduxHooks"
 
 type filtersProps = {
   filters: filterRow[],
+  activeFilters?: filterRow[],
   admin?: boolean
 }
 
-export function Filters({ filters, admin=false } : filtersProps) {
+export function Filters({ filters, activeFilters, admin=false } : filtersProps) {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(setAddVolunteerFilters(filters))
+    dispatch(setAddVolunteerFilters({ allFilters: filters, activeFilters }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

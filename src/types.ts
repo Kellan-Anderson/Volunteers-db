@@ -15,6 +15,18 @@ export type filterRow = InferSelectModel<typeof filters>;
 
 export type volunteerRow = InferSelectModel<typeof volunteers>;
 
+export type editableVolunteer = {
+	defaultValues: {
+		id: string,
+		name: string,
+		email: string,
+		phoneNumber: string | null,
+		notes: string | null,
+		profilePictureUrl: string | null
+	},
+	activeFilters: filterRow[]
+}
+
 /* ---------------------------------------------------- Props ------------------------------------------------------- */
 export type FormAreaProps = {
 	control: Control<z.infer<typeof volunteersParser>>
@@ -34,5 +46,7 @@ export const filtersParser = z.object({
 	urlId: z.string(),
 	selected: z.boolean()
 });
+
+export const filtersList = filtersParser.array();
 
 export const sortByParser = z.enum([ 'name-asc', 'name-desc', 'created-at-asc', 'created-at-desc' ]);

@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { verifyUser } from "~/lib/verifyUser";
-import { AddVolunteersForm } from "./_formComponents/addVolunteerForm";
+import { VolunteersForm } from "~/components/forms/volunteerForm/volunteerForm";
 import { api } from "~/trpc/server";
 
 export default async function AddVolunteerPage() {
@@ -14,7 +14,7 @@ export default async function AddVolunteerPage() {
 					<CardTitle className="font-bold text-lg">Add a volunteer</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<AddVolunteersForm filters={filters} admin={permission === 'admin'} />
+					<VolunteersForm filters={filters} admin={permission === 'admin'} />
 				</CardContent>
 			</Card>
 		</div>

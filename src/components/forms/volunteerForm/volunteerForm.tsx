@@ -13,60 +13,64 @@ import type { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
-import { uploadFiles } from "~/lib/uploadthing";
 import { api } from "~/trpc/react";
 import {
 	type FormAreaProps,
 	type filterRow,
+	type editableVolunteer,
 	volunteersParser,
 } from "~/types";
 import { Filters } from "./filters";
 import { useAppSelector } from "~/redux/reduxHooks";
+import { getEditableVolunteerObject } from "~/lib/getEditableVolunteerObject";
+import { useProfilePicture } from "~/hooks/useProfilePicture";
 
 type VolunteerFormProps = {
 	filters: filterRow[]
-	admin?: boolean
+	admin?: boolean,
+	defaultVolunteer?: editableVolunteer
 }
 
-export function AddVolunteersForm({ filters, admin=false } : VolunteerFormProps) {
+export function VolunteersForm({ filters, admin=false, defaultVolunteer } : VolunteerFormProps) {
 	const [loading, setLoading] = useState(false);
-	const [profilePicture, setProfilePicture] = useState<File | undefined>();
+	const { ProfilePicture, getPictureUrl } = useProfilePicture({
+		defaultUrl: defaultVolunteer?.defaultValues.profilePictureUrl,
+	})
 
 	const { categories, tags } = useAppSelector(state => state.filters)
 
 	const router = useRouter();
-	const { mutate } = api.volunteers.addVolunteer.useMutation({
+	const { mutate: addVolunteer } = api.volunteers.addVolunteer.useMutation({
 		onSuccess: () => router.push('/dashboard'),
 		onError: () => setLoading(false)
 	});
+	const { mutate: editVolunteer } = api.volunteers.editVolunteer.useMutation({
+		onSuccess: () => router.push('/dashboard'),
+		onError: () => setLoading(false)
+	})
 
 	const form = useForm<z.infer<typeof volunteersParser>>({
-		defaultValues: {
-			email: '',
-			name: '',
-			notes: '',
-			phoneNumber: ''
-		},
+		defaultValues: getEditableVolunteerObject(defaultVolunteer),
 		resolver: zodResolver(volunteersParser)
 	});
 
 	const onAddVolunteerSubmit: SubmitHandler<z.infer<typeof volunteersParser>> = async (values) => {
-		let profilePictureUrl: string | undefined = undefined;
-		setLoading(true);
-		if(profilePicture) {
-			const uploadedFile = await uploadFiles('profilePictureUpload', { files: [profilePicture] })
-			profilePictureUrl = uploadedFile.at(0)?.url;
-		}
-		mutate({
+		const profilePictureUrl = await getPictureUrl();
+		const volunteer = {
 			...values,
 			filters: [
 				...tags.filter(t => t.selected),
 				...categories.filter(c => c.selected)
 			],
-			profilePictureUrl
-		});
+			profilePictureUrl: profilePictureUrl ?? undefined
+		}
+
+		if(defaultVolunteer) {
+			editVolunteer({ ...volunteer, volunteerId: defaultVolunteer.defaultValues.id });
+		} else {
+			addVolunteer(volunteer)
+		}
 	}
 
 	const onAddVolunteerError: SubmitErrorHandler<z.infer<typeof volunteersParser>> = (values) => {
@@ -75,22 +79,16 @@ export function AddVolunteersForm({ filters, admin=false } : VolunteerFormProps)
 
 	return (
 		<Form {...form}>
+			<ProfilePicture />
 			<form onSubmit={form.handleSubmit(onAddVolunteerSubmit)} className="flex flex-col gap-0.5">
 				<GeneralInfoArea control={form.control} />
-				<div className="space-y-2">
-					<Label>Profile Picture</Label>
-					<Input
-						type="file"
-						onChange={(e) => setProfilePicture(e.target.files?.item(0) ?? undefined)}
-						/>
-				</div>
 			</form>
 			
 			<h1 className="text-lg font-bold pt-6">Extras</h1>
-			<Filters filters={filters} admin={admin} />
+			<Filters filters={filters} activeFilters={defaultVolunteer?.activeFilters} admin={admin} />
 			
 			<Button
-				type="button"
+				type="submit"
 				className="w-full mt-3"
 				onClick={() => form.handleSubmit(onAddVolunteerSubmit, onAddVolunteerError)()}
 			>

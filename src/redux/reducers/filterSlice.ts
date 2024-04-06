@@ -17,14 +17,17 @@ const filterSlice = createSlice({
   initialState,
   name: 'filters',
   reducers: {
-    setAddVolunteerFilters: (_, action: PayloadAction<filterRow[]>) => {
+    setAddVolunteerFilters: (_, action: PayloadAction<{allFilters: filterRow[], activeFilters?: filterRow[]}>) => {
+      const { allFilters, activeFilters } = action.payload;
       const categories: filter[] = [];
       const tags: filter[] = [];
-      action.payload.forEach(filter => {
+      allFilters.forEach(filter => {
+        const activeFilterIndex = activeFilters?.findIndex(f => f.id === filter.id);
+        const selected = activeFilterIndex !== undefined && activeFilterIndex !== -1
         if(filter.filterType === 'category') {
-          categories.push({ ...filter, selected: false })
+          categories.push({ ...filter, selected })
         } else {
-          tags.push({ ...filter, selected: false })
+          tags.push({ ...filter, selected })
         }
       })
       return {
