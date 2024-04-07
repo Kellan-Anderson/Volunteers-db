@@ -57,7 +57,7 @@ export function VolunteerRow({ admin=false, volunteer } : VolunteerRowProps) {
         </div>
         <CRUDButtons
           onMoreClick={() => pushItem(volunteer.url)}
-          onEditClick={() => router.push(`/edit/${volunteer.url}`)}
+          onEditClick={() => router.push(`/edit-volunteer/${volunteer.url}`)}
           onDeleteClick={() => setDeleteDialogOpen(true)}
           admin={admin}
         />

@@ -48,7 +48,7 @@ export function EditUserButton({ volunteerUrl } : EditUserButtonProps) {
       variant="link"
       className="p-0 h-fit"
     >
-      <Link href={`/edit/${volunteerUrl}`}>
+      <Link href={`/edit-volunteer/${volunteerUrl}`}>
         <Pencil className="h-4 w-4 text-muted-foreground hover:text-red-500" />
       </Link>
     </Button>

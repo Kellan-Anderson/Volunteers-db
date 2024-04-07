@@ -1,4 +1,4 @@
-import { VolunteersForm } from "~/components/forms/volunteerForm/volunteerForm";
+import { VolunteersForm } from "../../_volunteerForm/volunteerForm";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { api } from "~/trpc/server";
 import type { editableVolunteer } from "~/types";
