@@ -1,9 +1,12 @@
 'use client'
 
 import { ArrowDown, ArrowUp } from "lucide-react"
+import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { type z } from "zod"
+import { Button } from "~/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
@@ -14,13 +17,14 @@ import { type filter, type filterRow, sortByParser } from "~/types"
 
 type FilterAreaProps = {
   allFilters: filterRow[],
+  isAdmin?: boolean
 }
 
 type FilterProps = {
   filters: filter[]
 }
 
-export function FilterArea({ allFilters } : FilterAreaProps) {
+export function FilterArea({ allFilters, isAdmin=false } : FilterAreaProps) {
   const params = useSearchParams();
   const sortByValue = sortByParser.safeParse(params.get('sortBy'))
 
@@ -38,20 +42,45 @@ export function FilterArea({ allFilters } : FilterAreaProps) {
     }));
 
   return (
-    <div className="flex flex-col w-80 p-2">
-      <h1 className="font-bold text-lg">Filter and sort</h1>
+    <div className="flex flex-col w-80 p-2 m-2 border rounded-xl">
+      <h1 className="font-bold text-lg pb-3 pt-1 pl-1">Filter and sort</h1>
       <section id="sortBy">
-        <h1 className="py-1 font-semibold">Sort By</h1>
-        <SortingSelector defaultValue={sortByValue.success ? sortByValue.data : undefined} />
+        <Card>
+          <CardHeader className="p-3">
+            <CardTitle>Sort By</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 p-3">
+            <SortingSelector defaultValue={sortByValue.success ? sortByValue.data : undefined} />
+          </CardContent>
+        </Card>
       </section>
       <section id="categories" className="pt-2.5">
-        <h1 className="py-1 font-semibold">Categories</h1>
-        <CategoryFilters filters={categoryFilters} />
+        <Card>
+          <CardHeader className="p-3">
+            <CardTitle>Categories</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 p-3">
+            <CategoryFilters filters={categoryFilters} />
+          </CardContent>
+        </Card>
       </section>
       <section id="tags" className="pt-2.5">
-        <h1 className="py-1 font-semibold">Tags</h1>
-        <TagFilters filters={tagFilters} />
+        <Card>
+          <CardHeader className="p-3">
+            <CardTitle>Tags</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 p-3">
+            <TagFilters filters={tagFilters} />
+          </CardContent>
+        </Card>
       </section>
+      {isAdmin && (
+        <Button asChild variant="secondary" className="mt-2">
+          <Link href="/filters">
+            Edit filters
+          </Link>
+        </Button>
+      )}
     </div>
   );
 }

@@ -44,7 +44,7 @@ export default async function DashboardPage({ searchParams } : DashboardPageProp
 				<section className="grow">
 					{volunteers.map((v, i) => <VolunteerRow admin={permission === 'admin'} volunteer={v} key={i}/>)}
 				</section>
-				<FilterArea allFilters={filters} />
+				<FilterArea allFilters={filters} isAdmin={permission === 'admin'} />
 			</div>
 			{selectedVolunteerUrl && <VolunteerInformation volunteerUrl={selectedVolunteerUrl} />}
 		</>
