@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit"
 import filterSlice from "./reducers/filterSlice";
+import filtersDialogSlice from "./reducers/filtersDialogReducer";
 
 export const store = configureStore({
   reducer: {
-    filters: filterSlice
+    filters: filterSlice,
+    filterDialog: filtersDialogSlice
   }
 });
 
