@@ -1,7 +1,7 @@
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
 import type { filtersWithDetails } from "~/types";
 
-type filterDialogState = 'details' |'delete' | 'edit' | 'closed';
+type filterDialogState = 'add' |'delete' | 'edit' | 'closed';
 type reducerState = {
   dialogState: filterDialogState,
   filter?: filtersWithDetails

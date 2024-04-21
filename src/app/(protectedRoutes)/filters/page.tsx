@@ -1,7 +1,8 @@
 import { api } from "~/trpc/server";
 import { DataTable } from "../../../components/ui/dataTable";
-import { filterColumns } from "./_filtersComponents/table/columns";
-import { FilterDialog } from "./_filtersComponents/table/filterDialog";
+import { filterColumns } from "./_filtersComponents/columns";
+import { FilterDialog } from "./_filtersComponents/filterDialog";
+import { AddFilterButton } from "./_filtersComponents/addFilterButton";
 
 export default async function FiltersPage() {
 
@@ -9,7 +10,13 @@ export default async function FiltersPage() {
 
   return (
     <div className="h-screen w-full flex justify-center items-center">
-      <DataTable columns={filterColumns} data={filters} />
+      <div className="w-3/5">
+        <div className="flex flex-row justify-between w-full py-2">
+          <h1 className="text-2xl font-bold pb-1.5">Filters</h1>
+          <AddFilterButton />
+        </div>
+        <DataTable columns={filterColumns} data={filters} />
+      </div>
       <FilterDialog />
     </div>
   );

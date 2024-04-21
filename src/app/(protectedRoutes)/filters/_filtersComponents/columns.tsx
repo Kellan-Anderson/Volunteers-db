@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "~/components/ui/dropdown-menu";
 import { setFilterDialogState } from "~/redux/reducers/filtersDialogReducer";
@@ -42,8 +41,8 @@ export const filterColumns: ColumnDef<filterColumn>[] = [
   },
   {
     accessorKey: 'numVolunteers',
-    header: '# of volunteers',
-    cell: ({ row }) => <div className="text-center">{row.getValue('numVolunteers')}</div>
+    header: () => <p className="text-center"># of volunteers</p>,
+    cell: ({ row }) => <p className="text-center">{row.getValue('numVolunteers')}</p>
   },
   {
     id: "actions",
@@ -57,7 +56,7 @@ type ActionCellProps = {
 
 function ActionCell({ row } : ActionCellProps) {
   const dispatch = useAppDispatch();
-  const onItemClick = (option: 'details' | 'edit' | 'delete') => {
+  const onItemClick = (option: 'add' | 'edit' | 'delete') => {
     dispatch(setFilterDialogState({
       dialogState: option,
       filter: row.original
@@ -73,16 +72,14 @@ function ActionCell({ row } : ActionCellProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => onItemClick('details')}>View details</DropdownMenuItem>
-        <DropdownMenuSeparator />
         {row.original.type !== 'tag' && (
-          <DropdownMenuItem onClick={() => onItemClick('edit')}>Edit filter</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onItemClick('edit')}>Edit {row.original.type}</DropdownMenuItem>
         )}
         <DropdownMenuItem
           onClick={() => onItemClick('delete')}
           className="text-red-500"
         >
-          Delete filter
+          Delete {row.original.type}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
