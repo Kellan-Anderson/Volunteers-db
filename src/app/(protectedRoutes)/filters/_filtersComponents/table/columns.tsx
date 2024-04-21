@@ -1,16 +1,23 @@
 'use client'
 
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, Row } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Button } from "~/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from "~/components/ui/dropdown-menu";
 import { setFilterDialogState } from "~/redux/reducers/filtersDialogReducer";
 import { useAppDispatch } from "~/redux/reduxHooks";
 
 type filterColumn = {
   name: string,
   type: 'category' | 'tag',
-  numVolunteers: number
+  numVolunteers: number,
+  id: string
 }
 
 export const filterColumns: ColumnDef<filterColumn>[] = [
@@ -40,13 +47,23 @@ export const filterColumns: ColumnDef<filterColumn>[] = [
   },
   {
     id: "actions",
-    cell: ActionCell
+    cell: ({ row }) => ActionCell({ row })
   }
 ];
 
+type ActionCellProps = {
+  row: Row<filterColumn>
+}
 
-function ActionCell() {
+function ActionCell({ row } : ActionCellProps) {
   const dispatch = useAppDispatch();
+  const onItemClick = (option: 'details' | 'edit' | 'delete') => {
+    dispatch(setFilterDialogState({
+      dialogState: option,
+      filter: row.original
+    }))
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -56,10 +73,17 @@ function ActionCell() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => dispatch(setFilterDialogState('details'))}>View details</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onItemClick('details')}>View details</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => dispatch(setFilterDialogState('edit'))}>Edit filter</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => dispatch(setFilterDialogState('delete'))}>Delete filter</DropdownMenuItem>
+        {row.original.type !== 'tag' && (
+          <DropdownMenuItem onClick={() => onItemClick('edit')}>Edit filter</DropdownMenuItem>
+        )}
+        <DropdownMenuItem
+          onClick={() => onItemClick('delete')}
+          className="text-red-500"
+        >
+          Delete filter
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

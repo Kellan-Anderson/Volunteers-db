@@ -1,26 +1,31 @@
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
+import type { filtersWithDetails } from "~/types";
 
 type filterDialogState = 'details' |'delete' | 'edit' | 'closed';
 type reducerState = {
   dialogState: filterDialogState,
-  id: string
+  filter?: filtersWithDetails
 }
 
 const initialState: reducerState = {
   dialogState: 'closed',
-  id: ''
 }
 
 const filtersDialogSlice = createSlice({
   name: 'filterDialogSlice',
   initialState,
   reducers: {
-    setFilterDialogState: (state, action: PayloadAction<filterDialogState>) => ({
+    setFilterDialogOpenState: (state, action: PayloadAction<filterDialogState>) => ({
       ...state,
       dialogState: action.payload
-    })
+    }),
+    setFilterId: (state, action: PayloadAction<filtersWithDetails>) => ({
+      ...state,
+      filter: action.payload
+    }),
+    setFilterDialogState: (_state, action: PayloadAction<reducerState>) => action.payload
   }
 });
 
-export const { setFilterDialogState } = filtersDialogSlice.actions;
+export const { setFilterDialogOpenState, setFilterId, setFilterDialogState } = filtersDialogSlice.actions;
 export default filtersDialogSlice.reducer

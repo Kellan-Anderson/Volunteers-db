@@ -3,6 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { and, eq } from "drizzle-orm";
 import { filters, organizationsAndUsers } from "~/server/db/schema";
 import { randomId } from "~/lib/randomId";
+import type { filtersWithDetails } from "~/types";
 
 export const filterRouter = createTRPCRouter({
 	addFilter: protectedProcedure
@@ -91,7 +92,8 @@ export const filterRouter = createTRPCRouter({
 				}
 			});
 
-			const cleanedFilters = organizationFilters.map(f => ({
+			const cleanedFilters: filtersWithDetails[] = organizationFilters.map(f => ({
+				id: f.id,
 				name: f.name,
 				type: f.filterType,
 				numVolunteers: f.volunteers.length
@@ -133,7 +135,7 @@ export const filterRouter = createTRPCRouter({
 
 			const filterVerification = await ctx.db.query.filters.findFirst({ where: eq(filters.id, input.filterId) })
 			if(filterVerification?.filterType === 'tag') {
-				throw new Error('Tags can only be edited, not deleted')
+				throw new Error('Tags can only be deleted, not edited')
 			}
 
 			await ctx.db

@@ -27,6 +27,13 @@ export type editableVolunteer = {
 	activeFilters: filterRow[]
 }
 
+export type filtersWithDetails = {
+	id: string,
+	name: string,
+	type: 'category' | 'tag',
+	numVolunteers: number
+}
+
 /* ---------------------------------------------------- Props ------------------------------------------------------- */
 export type FormAreaProps = {
 	control: Control<z.infer<typeof volunteersParser>>
