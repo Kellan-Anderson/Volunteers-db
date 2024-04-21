@@ -10,7 +10,7 @@ export default async function FiltersPage() {
 
   return (
     <div className="h-screen w-full flex justify-center items-center">
-      <div className="w-3/5">
+      <div className="w-full md:w-3/5 px-12 md:p-0">
         <div className="flex flex-row justify-between w-full py-2">
           <h1 className="text-2xl font-bold pb-2">Filters</h1>
           <AddFilterButton />

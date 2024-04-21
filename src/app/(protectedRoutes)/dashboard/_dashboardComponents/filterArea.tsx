@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowDown, ArrowUp } from "lucide-react"
+import { ArrowDown, ArrowUp, SlidersHorizontal } from "lucide-react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
@@ -8,6 +8,7 @@ import { type z } from "zod"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Checkbox } from "~/components/ui/checkbox"
+import { Drawer, DrawerContent, DrawerTrigger } from "~/components/ui/drawer"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
@@ -24,7 +25,27 @@ type FilterProps = {
   filters: filter[]
 }
 
-export function FilterArea({ allFilters, isAdmin=false } : FilterAreaProps) {
+export function FilterArea(props: FilterAreaProps) {
+  return (
+    <>
+      <div className="hidden md:block">
+        <Filters {...props} />
+      </div>
+      <Drawer>
+        <DrawerTrigger asChild className="fixed bottom-2 right-2 md:hidden">
+          <Button className="rounded-full h-12 w-12 p-3">
+            <SlidersHorizontal className="h-9 w-9"/>
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent className="md:hidden">
+          <Filters {...props} />
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
+}
+
+function Filters({ allFilters, isAdmin=false } : FilterAreaProps) {
   const params = useSearchParams();
   const sortByValue = sortByParser.safeParse(params.get('sortBy'))
 
@@ -42,7 +63,7 @@ export function FilterArea({ allFilters, isAdmin=false } : FilterAreaProps) {
     }));
 
   return (
-    <div className="flex flex-col w-80 p-2 m-2 border rounded-xl">
+    <div className="flex flex-col w-full md:w-80 p-2 md:m-2 md:border rounded-xl">
       <h1 className="font-bold text-lg pb-3 pt-1 pl-1">Filter and sort</h1>
       <section id="sortBy">
         <Card>
