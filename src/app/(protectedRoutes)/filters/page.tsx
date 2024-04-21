@@ -12,7 +12,7 @@ export default async function FiltersPage() {
     <div className="h-screen w-full flex justify-center items-center">
       <div className="w-3/5">
         <div className="flex flex-row justify-between w-full py-2">
-          <h1 className="text-2xl font-bold pb-1.5">Filters</h1>
+          <h1 className="text-2xl font-bold pb-2">Filters</h1>
           <AddFilterButton />
         </div>
         <DataTable columns={filterColumns} data={filters} />

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import ReduxProvider from "~/redux/reduxProvider";
+import { AuthLoader } from "~/components/auth/authLoader";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -16,7 +17,7 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ export default function RootLayout({
         <ReduxProvider>
           <TRPCReactProvider>
             {children}
+            <AuthLoader />
           </TRPCReactProvider>
         </ReduxProvider>
       </body>

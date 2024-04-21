@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger
 } from "~/components/ui/dropdown-menu";
 import { setFilterDialogState } from "~/redux/reducers/filtersDialogReducer";
-import { useAppDispatch } from "~/redux/reduxHooks";
+import { useAppDispatch, useAppSelector } from "~/redux/reduxHooks";
 
 type filterColumn = {
   name: string,
@@ -55,6 +55,7 @@ type ActionCellProps = {
 }
 
 function ActionCell({ row } : ActionCellProps) {
+  const auth = useAppSelector(state => state.auth)
   const dispatch = useAppDispatch();
   const onItemClick = (option: 'add' | 'edit' | 'delete') => {
     dispatch(setFilterDialogState({
@@ -62,6 +63,10 @@ function ActionCell({ row } : ActionCellProps) {
       filter: row.original
     }))
   }
+
+  if(auth.loading || auth.permission !== 'admin') return (
+    <></>
+  )
 
   return (
     <DropdownMenu>
