@@ -39,7 +39,9 @@ export default async function DashboardPage({ searchParams } : DashboardPageProp
 				<h1 className="font-bold text-lg">Volunteers</h1>
 				<AddVolunteerButton />
 			</header>
-			<SearchBar />
+			<div className="p-2 pb-0">
+				<SearchBar />
+			</div>
 			<div className="flex flex-row w-full">
 				<section className="grow">
 					<VolunteerTable volunteers={volunteers} />

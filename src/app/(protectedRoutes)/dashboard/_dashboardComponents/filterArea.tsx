@@ -129,7 +129,7 @@ function TagFilters({ filters } : FilterProps) {
   const [tagQuery, setTagQuery] = useState('');
   const queriedFilters = tagQuery === '' 
     ? filters 
-    : filters.filter(f => f.name.toLowerCase().startsWith(tagQuery.toLowerCase()));
+    : filters.filter(f => f.name.toLowerCase().startsWith(tagQuery.toLowerCase())).slice(0, 10);
 
   return (
     <div className="flex flex-col w-full">

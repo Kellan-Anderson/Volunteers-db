@@ -22,7 +22,7 @@ export function SearchBar() {
   }
 
   return (
-    <div className="border border-y w-full flex flex-row justify-start items-center gap-1">
+    <div className="border border-y rounded-md w-full flex flex-row justify-start items-center gap-1">
       <Search className="mx-1.5"/>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(querySubmit)} className="w-full">
