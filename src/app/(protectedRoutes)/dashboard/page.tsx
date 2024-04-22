@@ -7,10 +7,10 @@ import { api } from "~/trpc/server";
 import { SearchBar } from "./_dashboardComponents/searchBar";
 import { FilterArea } from "./_dashboardComponents/filterArea";
 import { sortByParser } from "~/types";
-import { VolunteerRow } from "./_dashboardComponents/volunteerRow";
 import { DeleteUserButton, EditUserButton, PreviewSheet } from "./_dashboardComponents/previewSheet";
 import { AtSign, Phone, UserRound } from "lucide-react";
 import { Toggle } from "~/components/ui/toggle";
+import { VolunteerTable } from "./_dashboardComponents/volunteerTable";
 
 dayjs.extend(relativeTime)
 
@@ -42,7 +42,7 @@ export default async function DashboardPage({ searchParams } : DashboardPageProp
 			<SearchBar />
 			<div className="flex flex-row w-full">
 				<section className="grow">
-					{volunteers.map((v, i) => <VolunteerRow admin={permission === 'admin'} volunteer={v} key={i}/>)}
+					<VolunteerTable volunteers={volunteers} />
 				</section>
 				<FilterArea allFilters={filters} isAdmin={permission === 'admin'} />
 			</div>

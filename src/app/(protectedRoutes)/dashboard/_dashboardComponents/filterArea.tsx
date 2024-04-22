@@ -28,16 +28,16 @@ type FilterProps = {
 export function FilterArea(props: FilterAreaProps) {
   return (
     <>
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <Filters {...props} />
       </div>
       <Drawer>
-        <DrawerTrigger asChild className="fixed bottom-2 right-2 md:hidden">
+        <DrawerTrigger asChild className="fixed bottom-2 right-2 lg:hidden">
           <Button className="rounded-full h-12 w-12 p-3">
             <SlidersHorizontal className="h-9 w-9"/>
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="md:hidden">
+        <DrawerContent className="lg:hidden">
           <Filters {...props} />
         </DrawerContent>
       </Drawer>
@@ -63,7 +63,7 @@ function Filters({ allFilters, isAdmin=false } : FilterAreaProps) {
     }));
 
   return (
-    <div className="flex flex-col w-full md:w-80 p-2 md:m-2 md:border rounded-xl">
+    <div className="flex flex-col w-full lg:w-72 p-2 lg:m-2 lg:border rounded-xl">
       <h1 className="font-bold text-lg pb-3 pt-1 pl-1">Filter and sort</h1>
       <section id="sortBy">
         <Card>
