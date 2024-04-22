@@ -70,7 +70,7 @@ function TagFilters() {
     e.preventDefault();
     const tagExists = tags.find(t => t.name.toLowerCase() === tagQuery.toLowerCase());
     if(!tagExists) {
-      if(tagQuery !== '') {
+      if(tagQuery !== '' && tagQuery.trim() !== '') {
         mutate({ filterType: 'tag', name: tagQuery })
       }
     } else {
@@ -175,6 +175,7 @@ function CategoryFilters({ admin=false } : CategoryFiltersProps) {
           onClick={() => setAddCategoryDialogOpen(true)}
           variant="secondary"
           className="mt-3 w-full"
+          type="button"
         >
           Add Category
         </Button>

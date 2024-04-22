@@ -42,8 +42,9 @@ export const volunteersRouter = createTRPCRouter({
 				});
 
 			// Construct filter rows and add to db
-			const filterRows = constructFilterRows(input.filters, volunteerId)
-			await ctx.db.insert(filtersAndVolunteers).values(filterRows);
+			const filterRows = constructFilterRows(input.filters, volunteerId);
+			if(filterRows.length !== 0)
+				await ctx.db.insert(filtersAndVolunteers).values(filterRows);
 		}),
 
 	getVolunteers: protectedProcedure

@@ -78,23 +78,30 @@ export function VolunteersForm({ filters, admin=false, defaultVolunteer } : Volu
 	}
 
 	return (
-		<Form {...form}>
-			<ProfilePicture />
-			<form onSubmit={form.handleSubmit(onAddVolunteerSubmit)} className="flex flex-col gap-0.5">
-				<GeneralInfoArea control={form.control} />
-			</form>
-			
+		<div className="flex flex-col">
+			<Form {...form}>
+				<ProfilePicture />
+				<form onSubmit={form.handleSubmit(onAddVolunteerSubmit, onAddVolunteerError)} className="flex flex-col gap-0.5">
+					<GeneralInfoArea control={form.control} />
+
+					{/*
+						This needs to be hidden because a form requires a submit button to be present in the DOM for the user to 
+						submit the form when pressing enter
+					*/}
+					<Button type="submit" className="hidden"></Button>
+					
+				</form>
+			</Form>
 			<h1 className="text-lg font-bold pt-6">Extras</h1>
 			<Filters filters={filters} activeFilters={defaultVolunteer?.activeFilters} admin={admin} />
-			
 			<Button
-				type="submit"
+				type="button"
 				className="w-full mt-3"
 				onClick={() => form.handleSubmit(onAddVolunteerSubmit, onAddVolunteerError)()}
 			>
 				{loading ? <Loader2 className="text-blue-500 animate-spin" /> : "Submit"}
 			</Button>
-		</Form>
+		</div>
 	);
 }
 

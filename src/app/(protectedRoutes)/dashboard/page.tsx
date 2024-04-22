@@ -11,6 +11,8 @@ import { DeleteUserButton, EditUserButton, PreviewSheet } from "./_dashboardComp
 import { AtSign, Phone, UserRound } from "lucide-react";
 import { Toggle } from "~/components/ui/toggle";
 import { VolunteerTable } from "./_dashboardComponents/volunteerTable";
+import { unstable_noStore as noStore } from 'next/cache';
+import { Refresher } from "./_dashboardComponents/refresher";
 
 dayjs.extend(relativeTime)
 
@@ -19,6 +21,8 @@ type DashboardPageProps = {
 }
 
 export default async function DashboardPage({ searchParams } : DashboardPageProps) {
+	noStore();
+
 	const searchQuery = [searchParams.query].flat().at(0);
 	const urlFilters = [searchParams.filterBy ?? []].flat();
 	const sortingOrder = [searchParams.sortBy].flat().at(0);
@@ -35,6 +39,7 @@ export default async function DashboardPage({ searchParams } : DashboardPageProp
 
 	return (
 		<>
+			<Refresher />
 			<header className="flex flex-row justify-between items-center p-2 pl-14 lg:pl-2 border-b">
 				<h1 className="font-bold text-lg">Volunteers</h1>
 				<AddVolunteerButton />
