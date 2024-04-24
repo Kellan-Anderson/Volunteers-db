@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { filters, organizations, organizationsAndUsers, users } from "~/server/db/schema";
-import { and, eq } from "drizzle-orm";
+import { organizations, organizationsAndUsers, users } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 
 export const organizationsRouter = createTRPCRouter({
 	newOrganization: protectedProcedure
@@ -47,37 +47,58 @@ export const organizationsRouter = createTRPCRouter({
 				name: organization.organizationName,
 				id: organization.id,
 			}));
-			return orgs
+			const { permission } = orgs.find(o => o.id === ctx.session.user.lastOrganizationId)!
+
+			return {
+				permission,
+				organizations: orgs,
+			}
 		}),
 
 	getCurrentOrganization: protectedProcedure
 		.query(async ({ ctx }) => {
-			const { id: userId, lastOrganizationId } = ctx.session.user;
+			const { lastOrganizationId } = ctx.session.user;
 			if(lastOrganizationId === null) {
 				throw new Error('User has not joined or setup an organization')
 			}
-			const usersOrg = await ctx.db.query.organizationsAndUsers.findFirst({
-				where: and(
-					eq(organizationsAndUsers.userId, userId),
-					eq(organizationsAndUsers.organizationId, lastOrganizationId)
-				),
-				with: {
-					organization: {
-						with: {
-							filters: {
-								where: eq(filters.organizationId, lastOrganizationId)
-							}
-						}
+
+			let userPermission: 'user' | 'admin' = 'user';
+
+			const [organization, users] = await Promise.all([
+				ctx.db.query.organizations.findFirst({
+					where: eq(organizations.id, lastOrganizationId),
+					with: { filters: true } 
+				}),
+
+				ctx.db.query.organizationsAndUsers.findMany({
+					where: eq(organizations.id, lastOrganizationId),
+					with: {
+						user: true
 					}
-				}
-			});
-			if(!usersOrg) {
+				})
+			]);
+
+			if(!organization) {
 				throw new Error('There was an issue finding the users organization')
 			}
+
+			const organizationUsers = users.map(({ user, permission }) => {
+				if(user.id === ctx.session.user.id) {
+					userPermission = permission;
+				}
+				return {
+					id: user.id,
+					name: user.name,
+					email: user.email,
+					permission
+				}
+			})
+
 			return {
-				permission: usersOrg.permission,
-				organizationName: usersOrg.organization.organizationName,
-				filters: usersOrg.organization.filters
+				permission: userPermission,
+				organizationName: organization.organizationName,
+				filters: organization.filters,
+				users: organizationUsers
 			}
-		})
+		}),
 })

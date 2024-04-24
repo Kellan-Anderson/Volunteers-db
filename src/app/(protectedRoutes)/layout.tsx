@@ -13,10 +13,8 @@ type ProtectedRoutesLayoutProps = {
 
 export default async function ProtectedRoutesLayout({ children } : ProtectedRoutesLayoutProps) {
 	const user = await verifyUser({ callbackUrl: '/dashboard', verifyUserOrganization: true });
-	const organizations = await api.organizations.getUsersOrganizations.query();
+	const { organizations, permission } = await api.organizations.getUsersOrganizations.query();
 
-	const { permission } = organizations.find(o => o.id === user.lastOrganizationId)!;
-	
 	return (
 		<div className="flex flex-row">
 			<Navbar>
