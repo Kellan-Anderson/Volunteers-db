@@ -34,6 +34,13 @@ export type filtersWithDetails = {
 	numVolunteers: number
 }
 
+export type userInfo = {
+  id: string,
+  name: string | null,
+  email: string,
+  permission: 'user' | 'admin'
+}
+
 /* ---------------------------------------------------- Props ------------------------------------------------------- */
 export type FormAreaProps = {
 	control: Control<z.infer<typeof volunteersParser>>

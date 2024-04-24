@@ -71,7 +71,7 @@ export const organizationsRouter = createTRPCRouter({
 				}),
 
 				ctx.db.query.organizationsAndUsers.findMany({
-					where: eq(organizations.id, lastOrganizationId),
+					where: eq(organizationsAndUsers.organizationId, lastOrganizationId),
 					with: {
 						user: true
 					}
