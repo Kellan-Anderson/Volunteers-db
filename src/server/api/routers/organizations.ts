@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { organizations, organizationsAndUsers, users } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const organizationsRouter = createTRPCRouter({
 	newOrganization: protectedProcedure
@@ -57,7 +57,7 @@ export const organizationsRouter = createTRPCRouter({
 
 	getCurrentOrganization: protectedProcedure
 		.query(async ({ ctx }) => {
-			const { lastOrganizationId } = ctx.session.user;
+			const { lastOrganizationId, id: userId } = ctx.session.user;
 			if(lastOrganizationId === null) {
 				throw new Error('User has not joined or setup an organization')
 			}
@@ -82,10 +82,11 @@ export const organizationsRouter = createTRPCRouter({
 				throw new Error('There was an issue finding the users organization')
 			}
 
-			const organizationUsers = users.map(({ user, permission }) => {
+			const organizationUsers = users.flatMap(({ user, permission }) => {
 				if(user.id === ctx.session.user.id) {
 					userPermission = permission;
 				}
+				if(user.id === userId) return [];
 				return {
 					id: user.id,
 					name: user.name,
@@ -101,4 +102,57 @@ export const organizationsRouter = createTRPCRouter({
 				users: organizationUsers
 			}
 		}),
+
+	removeUser: protectedProcedure
+		.input(z.object({
+			userId: z.string()
+		}))
+		.mutation(async ({ ctx, input }) => {
+			// Verify the user has setup an organization
+			const { lastOrganizationId, id: userId } = ctx.session.user;
+			if(!lastOrganizationId) throw new Error('User has not setup/joined an organization');
+
+			const requestingUser = await ctx.db.query.organizationsAndUsers.findFirst({
+				where: and(
+					eq(organizationsAndUsers.userId, userId),
+					eq(organizationsAndUsers.organizationId, lastOrganizationId),
+				)
+			});
+
+			if(requestingUser?.permission !== 'admin')
+				throw new Error('User must be an admin to remove other users');
+
+			await ctx.db.delete(organizationsAndUsers).where(and(
+				eq(organizationsAndUsers.userId, input.userId),
+				eq(organizationsAndUsers.organizationId, lastOrganizationId),
+			))
+		}),
+
+	changeUserPermission: protectedProcedure
+		.input(z.object({
+			userId: z.string(),
+			newPermission: z.enum(['admin', 'user'])
+		}))
+		.mutation(async ({ ctx, input }) => {
+			const { lastOrganizationId, id: userId } = ctx.session.user;
+			if(!lastOrganizationId) throw new Error('User has not setup/joined an organization');
+
+			const requestingUser = await ctx.db.query.organizationsAndUsers.findFirst({
+				where: and(
+					eq(organizationsAndUsers.userId, userId),
+					eq(organizationsAndUsers.organizationId, lastOrganizationId),
+				)
+			});
+
+			if(requestingUser?.permission !== 'admin')
+				throw new Error('User must be an admin to change other users permissions');
+
+			await ctx.db
+				.update(organizationsAndUsers)
+				.set({ permission: input.newPermission })
+				.where(and(
+					eq(organizationsAndUsers.organizationId, lastOrganizationId),
+					eq(organizationsAndUsers.userId, input.userId)
+				))
+		})
 })
