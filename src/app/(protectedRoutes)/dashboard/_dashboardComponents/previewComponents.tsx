@@ -3,40 +3,10 @@
 import { Pencil, Trash } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button } from "~/components/ui/button";
-import { Sheet, SheetContent } from "~/components/ui/sheet";
 import { useUrlState } from "~/hooks/useUrlState";
 import { api } from "~/trpc/react";
-
-type PreviewSheetProps = {
-  volunteerUrl: string,
-  children?: React.ReactNode,
-}
-
-export function PreviewSheet({ volunteerUrl, children } : PreviewSheetProps) {
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const { removeItem } = useUrlState('volunteer');
-
-  useEffect(() => {
-    setSheetOpen(true)
-  }, [])
-
-  const onClose = (open: boolean) => {
-    if(!open) {
-      setSheetOpen(false)
-      removeItem(volunteerUrl)
-    }
-  }
-
-  return (
-    <Sheet onOpenChange={onClose} open={sheetOpen}>
-      <SheetContent>
-        {children}
-      </SheetContent>
-    </Sheet>
-  );
-}
 
 type EditUserButtonProps = {
   volunteerUrl: string

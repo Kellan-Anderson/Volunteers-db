@@ -7,12 +7,13 @@ import { api } from "~/trpc/server";
 import { SearchBar } from "./_dashboardComponents/searchBar";
 import { FilterArea } from "./_dashboardComponents/filterArea";
 import { sortByParser } from "~/types";
-import { DeleteUserButton, EditUserButton, PreviewSheet } from "./_dashboardComponents/previewSheet";
+import { DeleteUserButton, EditUserButton } from "./_dashboardComponents/previewComponents";
 import { AtSign, Phone, UserRound } from "lucide-react";
 import { Toggle } from "~/components/ui/toggle";
 import { VolunteerTable } from "./_dashboardComponents/volunteerTable";
 import { unstable_noStore as noStore } from 'next/cache';
 import { Refresher } from "./_dashboardComponents/refresher";
+import { PreviewSheet } from "~/components/previewSheet";
 
 dayjs.extend(relativeTime)
 
@@ -80,7 +81,7 @@ async function VolunteerInformation({ volunteerUrl } : VolunteerInformationProps
 	const categories = volunteer.activeFilters.filter(f => f.filterType === 'category')
 
 	return (
-		<PreviewSheet volunteerUrl={volunteerUrl}>
+		<PreviewSheet itemUrl={volunteerUrl} urlKey="volunteer">
 			<div className="flex flex-col">
 				<header className="flex flex-row">
 					<div className="h-20 w-20 bg-secondary/90 rounded-full overflow-hidden relative flex justify-center items-center">

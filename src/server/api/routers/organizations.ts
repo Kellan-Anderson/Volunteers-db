@@ -66,8 +66,6 @@ export const organizationsRouter = createTRPCRouter({
 				throw new Error('User has not joined or setup an organization')
 			}
 
-			let userPermission: 'user' | 'admin' = 'user';
-
 			const [organization, users] = await Promise.all([
 				ctx.db.query.organizations.findFirst({
 					where: eq(organizations.id, lastOrganizationId),
@@ -87,9 +85,6 @@ export const organizationsRouter = createTRPCRouter({
 			}
 
 			const organizationUsers = users.flatMap(({ user, permission }) => {
-				if(user.id === ctx.session.user.id) {
-					userPermission = permission;
-				}
 				if(user.id === userId) return [];
 				return {
 					id: user.id,
@@ -97,7 +92,9 @@ export const organizationsRouter = createTRPCRouter({
 					email: user.email,
 					permission
 				}
-			})
+			});
+
+			const userPermission = users.find(({ user }) => user.id === userId)?.permission ?? 'user'
 
 			return {
 				permission: userPermission,
