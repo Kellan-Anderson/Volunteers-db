@@ -9,6 +9,7 @@ import { DataTable } from "~/components/ui/dataTable"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
+import { useToast } from "~/components/ui/use-toast"
 import { closeUserAction, openUserAction } from "~/redux/reducers/organizationUserActionsSlice"
 import { useAppDispatch, useAppSelector } from "~/redux/reduxHooks"
 import { api } from "~/trpc/react"
@@ -143,11 +144,17 @@ function DeleteUserContent() {
   const { action, userId } = useAppSelector(state => state.organizationUserAction);
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const toaster = useToast();
   const { mutate, isLoading } = api.organizations.removeUser.useMutation({
     onSuccess: () => {
       router.refresh();
       dispatch(closeUserAction())
-    }
+    },
+    onError: (err) => toaster.toast({
+      variant: "destructive",
+      title: "There was an error",
+      description: err.message
+    })
   });
 
   if(action !== 'hidden' && userId === '') {
@@ -189,11 +196,17 @@ function ChangePermissionContent() {
   const { action, userId } = useAppSelector(state => state.organizationUserAction);
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const toaster = useToast();
   const { mutate, isLoading } = api.organizations.changeUserPermission.useMutation({
     onSuccess: () => {
       router.refresh();
       dispatch(closeUserAction())
-    }
+    },
+    onError: (err) => toaster.toast({
+      variant: "destructive",
+      title: "There was an error",
+      description: err.message
+    })
   });
 
   if(action !== 'hidden' && userId === '') {
@@ -225,7 +238,7 @@ function ChangePermissionContent() {
           </SelectContent>
         </Select>
         <Button
-          disabled={!hasChanged}
+          disabled={!hasChanged || isLoading}
           onClick={() => mutate({ newPermission: permissionSelection, userId })}
           variant="secondary"
         >

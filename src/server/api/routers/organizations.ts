@@ -2,6 +2,10 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { organizations, organizationsAndUsers, users } from "~/server/db/schema";
 import { and, eq } from "drizzle-orm";
+import { Resend } from "resend";
+import { env } from "~/env";
+import { RemoveUserEmail } from "~/components/emails/removeUserEmail";
+import { ChangePermissionsEmail } from "~/components/emails/changePermissionsEmail";
 
 export const organizationsRouter = createTRPCRouter({
 	newOrganization: protectedProcedure
@@ -112,20 +116,57 @@ export const organizationsRouter = createTRPCRouter({
 			const { lastOrganizationId, id: userId } = ctx.session.user;
 			if(!lastOrganizationId) throw new Error('User has not setup/joined an organization');
 
-			const requestingUser = await ctx.db.query.organizationsAndUsers.findFirst({
-				where: and(
-					eq(organizationsAndUsers.userId, userId),
-					eq(organizationsAndUsers.organizationId, lastOrganizationId),
-				)
-			});
+			const [requestingUser, targetUser] = await Promise.all([
+				// Requesting user
+				ctx.db.query.organizationsAndUsers.findFirst({
+					where: and(
+						eq(organizationsAndUsers.userId, userId),
+						eq(organizationsAndUsers.organizationId, lastOrganizationId),
+					),
+					with: {
+						organization: true,
+						user: true
+					}
+				}),
 
+				// Target user
+				ctx.db.query.organizationsAndUsers.findFirst({
+					where: and(
+						eq(organizationsAndUsers.userId, input.userId),
+						eq(organizationsAndUsers.organizationId, lastOrganizationId)
+					),
+					with: {
+						user: true
+					}
+				}),
+			])
+
+			// Permissions check
+			if(!targetUser || !requestingUser) throw new Error('There was an error validating the user');
+			
+			if(targetUser.permission === 'admin' && requestingUser.userId !== requestingUser.organization.createdBy) {
+				throw new Error('Only the owner of the organization can remove admin members')
+			}
+			
 			if(requestingUser?.permission !== 'admin')
 				throw new Error('User must be an admin to remove other users');
 
 			await ctx.db.delete(organizationsAndUsers).where(and(
 				eq(organizationsAndUsers.userId, input.userId),
 				eq(organizationsAndUsers.organizationId, lastOrganizationId),
-			))
+			));
+
+			const resend = new Resend(env.RESEND_API_KEY);
+			await resend.emails.send({
+				from: `${requestingUser.organization.organizationName} <onboarding@resend.dev>`,
+				subject: 'Notification of removal',
+				to: targetUser.user.email,
+				react: RemoveUserEmail({
+					name: targetUser.user.name,
+					organizationName: requestingUser.organization.organizationName,
+					organizationOwnerEmail: requestingUser.user.email
+				})
+			})
 		}),
 
 	changeUserPermission: protectedProcedure
@@ -137,15 +178,40 @@ export const organizationsRouter = createTRPCRouter({
 			const { lastOrganizationId, id: userId } = ctx.session.user;
 			if(!lastOrganizationId) throw new Error('User has not setup/joined an organization');
 
-			const requestingUser = await ctx.db.query.organizationsAndUsers.findFirst({
-				where: and(
-					eq(organizationsAndUsers.userId, userId),
-					eq(organizationsAndUsers.organizationId, lastOrganizationId),
-				)
-			});
+			const [requestingUser, targetUser] = await Promise.all([
+				// Requesting user
+				ctx.db.query.organizationsAndUsers.findFirst({
+					where: and(
+						eq(organizationsAndUsers.userId, userId),
+						eq(organizationsAndUsers.organizationId, lastOrganizationId),
+					),
+					with: {
+						organization: true,
+						user: true
+					}
+				}),
 
+				// Target user
+				ctx.db.query.organizationsAndUsers.findFirst({
+					where: and(
+						eq(organizationsAndUsers.userId, input.userId),
+						eq(organizationsAndUsers.organizationId, lastOrganizationId)
+					),
+					with: {
+						user: true
+					}
+				}),
+			])
+
+			// Permissions check
+			if(!targetUser || !requestingUser) throw new Error('There was an error validating the user');
+			
+			if(targetUser.permission === 'admin' && requestingUser.userId !== requestingUser.organization.createdBy) {
+				throw new Error('Only the owner of the organization can change permissions of admin members')
+			}
+			
 			if(requestingUser?.permission !== 'admin')
-				throw new Error('User must be an admin to change other users permissions');
+				throw new Error('User must be an admin to change the permissions of other users');
 
 			await ctx.db
 				.update(organizationsAndUsers)
@@ -153,6 +219,18 @@ export const organizationsRouter = createTRPCRouter({
 				.where(and(
 					eq(organizationsAndUsers.organizationId, lastOrganizationId),
 					eq(organizationsAndUsers.userId, input.userId)
-				))
+				));
+
+			const resend = new Resend(env.RESEND_API_KEY);
+			await resend.emails.send({
+				from: `${requestingUser.organization.organizationName} <onboarding@resend.dev>`,
+				subject: 'Notification of permission change',
+				to: targetUser.user.email,
+				react: ChangePermissionsEmail({
+					name: targetUser.user.name,
+					organizationName: requestingUser.organization.organizationName,
+					newPermission: input.newPermission
+				})
+			})
 		})
 })

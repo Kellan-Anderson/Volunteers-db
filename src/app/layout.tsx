@@ -5,6 +5,7 @@ import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import ReduxProvider from "~/redux/reduxProvider";
 import { AuthLoader } from "~/components/auth/authLoader";
+import { Toaster } from "~/components/ui/toaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ export default async function RootLayout({
           <TRPCReactProvider>
             {children}
             <AuthLoader />
+            <Toaster />
           </TRPCReactProvider>
         </ReduxProvider>
       </body>
