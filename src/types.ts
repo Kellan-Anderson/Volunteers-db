@@ -46,6 +46,10 @@ export type FormAreaProps = {
 	control: Control<z.infer<typeof volunteersParser>>
 }
 
+export type PictureProps = {
+  image?: string | File | null
+}
+
 /* --------------------------------------------------- Parsers ------------------------------------------------------ */
 export const volunteersParser = z.object({
 	name: z.string().min(1, 'Name is required'),

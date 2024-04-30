@@ -1,17 +1,14 @@
-import Image from "next/image"
-import { FolderUp, Pencil, Trash, UserRound } from "lucide-react"
+import { FolderUp, Pencil, Trash } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "~/components/ui/dropdown-menu"
-import { Button } from "~/components/ui/button"
-import { useRef, useState } from "react"
-import { uploadFiles } from "~/lib/uploadthing"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "~/components/ui/dialog"
-import { api } from "~/trpc/react"
+import { Button } from "~/components/ui/button"
 import { Label } from "~/components/ui/label"
 import { Input } from "~/components/ui/input"
-
-type PictureProps = {
-  image?: string | File | null
-}
+import { Picture } from "~/components/profilePicture"
+import { useRef, useState } from "react"
+import { uploadFiles } from "~/lib/uploadthing"
+import { api } from "~/trpc/react"
+import type { PictureProps } from "~/types"
 
 type useProfilePictureProps = {
   defaultUrl: string | null | undefined
@@ -129,31 +126,6 @@ export function useProfilePicture({ defaultUrl } : useProfilePictureProps) {
     ProfilePicture,
     getPictureUrl,
   }
-}
-
-
-function Picture({ image } : PictureProps) {
-  if(typeof image === 'string' && image !== '') {
-    return (
-      <div className="h-36 w-36 rounded-full overflow-hidden relative">
-        <Image src={image} alt="Profile picture" fill />
-      </div>
-    )
-  }
-
-  if(image !== undefined && typeof image === 'object' && image !== null) {
-    return (
-      <div className="h-36 w-36 rounded-full overflow-hidden relative">
-        <Image src={URL.createObjectURL(image)} alt="Profile picture" fill />
-      </div>
-    )
-  }
-
-  return (
-    <div className="h-36 w-36 rounded-full flex justify-center items-center bg-secondary/50">
-      <UserRound className="h-8 w-8"/>
-    </div>
-  )
 }
 
 function DeleteContent({ onDelete, onOpenChange } : DeleteContentProps & dialogContentProps) {
