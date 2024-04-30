@@ -75,7 +75,7 @@ type VolunteerTableProps = {
 export function VolunteerTable({ volunteers } : VolunteerTableProps) {
   return (
     <div className="p-2 pb-0 md:pr-0 max-h-screen">
-      <DataTable columns={volunteerTableColumns} data={volunteers} />
+      <DataTable columns={volunteerTableColumns} data={volunteers} paginate />
     </div>
   );
 }

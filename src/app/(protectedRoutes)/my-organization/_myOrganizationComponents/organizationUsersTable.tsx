@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "~/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { useToast } from "~/components/ui/use-toast"
+import { useUrlState } from "~/hooks/useUrlState"
 import { closeUserAction, openUserAction } from "~/redux/reducers/organizationUserActionsSlice"
 import { useAppDispatch, useAppSelector } from "~/redux/reduxHooks"
 import { api } from "~/trpc/react"
@@ -77,7 +78,7 @@ export const organizationUsersColumns: ColumnDef<userInfo>[] = [
 export function OrganizationUsersTable({ users } : UsersTableProps) {
   return (
     <>
-      <DataTable columns={organizationUsersColumns} data={users} />
+      <DataTable columns={organizationUsersColumns} data={users} paginate />
       <OrganizationUserActionDialog />
     </>
   );
@@ -86,6 +87,7 @@ export function OrganizationUsersTable({ users } : UsersTableProps) {
 function OrganizationUserActionCell({ userId } : OrganizationUserActionCellProps) {
   const authState = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
+  const { pushItem } = useUrlState('user')
 
   return (
     <DropdownMenu>
@@ -96,7 +98,7 @@ function OrganizationUserActionCell({ userId } : OrganizationUserActionCellProps
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => pushItem(userId)}>
           View details
         </DropdownMenuItem>
         {(authState.loading === false && authState.permission === 'admin') && (

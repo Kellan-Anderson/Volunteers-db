@@ -84,7 +84,9 @@ export function useProfilePicture({ defaultUrl } : useProfilePictureProps) {
       <>
         <div className="relative w-fit h-fit">
           {/* TODO need to change 'defaultUrl ?? undefined' to fallback to selected profile picture */}
-          <Picture image={profilePicture ?? defaultUrl ?? undefined}/>
+          <div className="h-36 w-36">
+            <Picture image={profilePicture ?? defaultUrl ?? undefined}/>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" className="absolute bottom-0 right-0 rounded-full p-1.5">

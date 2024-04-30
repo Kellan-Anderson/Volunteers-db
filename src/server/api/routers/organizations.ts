@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { organizations, organizationsAndUsers, users } from "~/server/db/schema";
+import { organizations, organizationsAndUsers, users, volunteers } from "~/server/db/schema";
 import { and, eq } from "drizzle-orm";
 import { Resend } from "resend";
 import { env } from "~/env";
@@ -229,5 +229,39 @@ export const organizationsRouter = createTRPCRouter({
 					newPermission: input.newPermission
 				})
 			})
+		}),
+
+	getUser: protectedProcedure
+		.input(z.object({
+			userId: z.string()
+		}))
+		.query(async ({ ctx, input }) => {
+			const { lastOrganizationId } = ctx.session.user;
+			if(!lastOrganizationId) throw new Error('User has not setup/joined an organization');
+
+			const userInfo = await ctx.db.query.organizationsAndUsers.findFirst({
+				where: eq(organizationsAndUsers.userId, input.userId),
+				with: {
+					user: true
+				}
+			});
+
+			if(!userInfo)
+				throw new Error('That user is not a member of this organization');
+
+			const userVolunteers = await ctx.db.query.volunteers.findMany({
+				where: and(
+					eq(volunteers.createdBy, input.userId),
+					eq(volunteers.organizationId, lastOrganizationId)
+				)
+			});
+
+			return {
+				permission: userInfo.permission,
+				name: userInfo.user.name,
+				email: userInfo.user.email,
+				image: userInfo.user.image,
+				volunteers: userVolunteers.map(({ id, name, createdAt, url }) => ({ id, name, createdAt, url }))
+			}
 		})
 })

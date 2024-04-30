@@ -15,7 +15,7 @@ export default async function FiltersPage() {
           <h1 className="text-2xl font-bold pb-2">Filters</h1>
           <AddFilterButton />
         </div>
-        <DataTable columns={filterColumns} data={filters} />
+        <DataTable columns={filterColumns} data={filters} paginate />
       </div>
       <FilterDialog />
     </div>
