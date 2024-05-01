@@ -104,6 +104,54 @@ export const organizationsRouter = createTRPCRouter({
 			}
 		}),
 
+	changeOrganizationName: protectedProcedure
+		.input(z.object({
+			newName: z.string()
+		}))
+		.mutation(async ({ ctx, input }) => {
+			const { lastOrganizationId, id: userId } = ctx.session.user;
+			if(lastOrganizationId === null) {
+				throw new Error('User has not joined or setup an organization')
+			}
+
+			const permissionCheck = await ctx.db.query.organizationsAndUsers.findFirst({
+				where: and(
+					eq(organizationsAndUsers.organizationId, lastOrganizationId),
+					eq(organizationsAndUsers.userId, userId)
+				)
+			});
+
+			if(permissionCheck?.permission !== 'owner')
+				throw new Error('You ust be an owner to change organization details');
+
+			await ctx.db
+				.update(organizations)
+				.set({ organizationName: input.newName })
+				.where(eq(organizations.id, lastOrganizationId))
+		}),
+
+	deleteOrganization: protectedProcedure
+		.mutation(async ({ ctx }) => {
+			const { lastOrganizationId, id: userId } = ctx.session.user;
+			if(lastOrganizationId === null) {
+				throw new Error('User has not joined or setup an organization')
+			}
+
+			const permissionCheck = await ctx.db.query.organizationsAndUsers.findFirst({
+				where: and(
+					eq(organizationsAndUsers.organizationId, lastOrganizationId),
+					eq(organizationsAndUsers.userId, userId)
+				)
+			});
+
+			if(permissionCheck?.permission !== 'owner')
+				throw new Error('You ust be an owner to change organization details');
+
+			await ctx.db
+				.delete(organizations)
+				.where(eq(organizations.id, lastOrganizationId))
+		}),
+
 	removeUser: protectedProcedure
 		.input(z.object({
 			userId: z.string()
