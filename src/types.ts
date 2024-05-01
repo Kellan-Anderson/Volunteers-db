@@ -1,6 +1,6 @@
 import type { Control } from "react-hook-form"
 import { z } from "zod"
-import type { volunteers, filters } from "./server/db/schema"
+import { type volunteers, type filters, userRole } from "./server/db/schema"
 import type { InferSelectModel } from "drizzle-orm"
 
 /* ---------------------------------------------------- Types ------------------------------------------------------- */
@@ -12,6 +12,9 @@ export type filter = {
 }
 
 export type filterRow = InferSelectModel<typeof filters>;
+
+const userRoleZodEnum = z.enum(userRole.enumValues);
+export type organizationPermissions = z.infer<typeof userRoleZodEnum>
 
 export type volunteerRow = InferSelectModel<typeof volunteers>;
 
@@ -38,7 +41,7 @@ export type userInfo = {
   id: string,
   name: string | null,
   email: string,
-  permission: 'user' | 'admin'
+  permission: organizationPermissions
 }
 
 /* ---------------------------------------------------- Props ------------------------------------------------------- */

@@ -20,7 +20,7 @@ import { createInsertSchema } from "drizzle-zod"
  */
 export const createTable = pgTableCreator((name) => `volunteer_db_${name}`);
 
-export const userRole = pgEnum('user_role', ['admin', 'user'])
+export const userRole = pgEnum('user_role', ['admin', 'user', 'owner']);
 
 export const users = createTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),

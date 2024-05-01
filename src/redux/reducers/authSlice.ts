@@ -1,10 +1,9 @@
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
-
-type permission = 'admin' | 'user'
+import type { organizationPermissions } from "~/types";
 
 type authState = {
   loading: boolean,
-  permission: permission | ''
+  permission: organizationPermissions | ''
 }
 
 const initialState: authState = {
@@ -16,7 +15,7 @@ const authSlice = createSlice({
   initialState,
   name: 'authSlice',
   reducers: {
-    setAuthState: (_state, action: PayloadAction<permission>) => ({
+    setAuthState: (_state, action: PayloadAction<organizationPermissions>) => ({
       loading: false,
       permission: action.payload
     })
