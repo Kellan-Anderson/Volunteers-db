@@ -20,13 +20,15 @@ declare module "next-auth" {
     user: {
       id: string;
       // ...other properties
-      lastOrganizationId: string | null
+      lastOrganizationId: string | null,
+      completedSetup: boolean,
     } & DefaultSession["user"];
   }
 
   interface User {
     // ...other properties
     lastOrganizationId: string | null;
+    completedSetup: boolean;
   }
 }
 
@@ -43,7 +45,8 @@ export const authOptions: NextAuthOptions = {
         user: {
           ...session.user,
           id: user.id,
-          lastOrganizationId: user.lastOrganizationId
+          lastOrganizationId: user.lastOrganizationId,
+          completedSetup: user.completedSetup
         },
       }
     },

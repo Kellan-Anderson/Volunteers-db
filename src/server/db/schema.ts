@@ -30,7 +30,8 @@ export const users = createTable("user", {
     mode: "date",
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
-  lastOrganizationId: varchar('last_organization', { length: 255 })
+  lastOrganizationId: varchar('last_organization', { length: 255 }),
+  completedSetup: boolean('completed_setup').notNull().default(false),
 });
 
 export const UserInsertSchema = createInsertSchema(users)
@@ -130,7 +131,9 @@ export const organizationsAndUsers = createTable('organizations_and_users', {
   userId: varchar('user_id', { length: 255 }).notNull().references(() => users.id, { onDelete: 'cascade' }),
   organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id, { onDelete: 'cascade' }),
   permission: userRole('role').notNull().default('user'),
-});
+}, (t) => ({
+  pk: primaryKey({ columns: [ t.organizationId, t.userId ] })
+}));
 
 export const organizationsAndUsersRelations = relations(organizationsAndUsers, ({ one }) => ({
   user: one(users, {

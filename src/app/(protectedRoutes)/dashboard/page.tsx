@@ -14,6 +14,7 @@ import { VolunteerTable } from "./_dashboardComponents/volunteerTable";
 import { unstable_noStore as noStore } from 'next/cache';
 import { Refresher } from "./_dashboardComponents/refresher";
 import { PreviewSheet } from "~/components/previewSheet";
+import { verifyUser } from "~/lib/verifyUser";
 
 dayjs.extend(relativeTime)
 
@@ -23,6 +24,8 @@ type DashboardPageProps = {
 
 export default async function DashboardPage({ searchParams } : DashboardPageProps) {
 	noStore();
+
+	await verifyUser({ callbackUrl: '/dashboard' });
 
 	const searchQuery = [searchParams.query].flat().at(0);
 	const urlFilters = [searchParams.filterBy ?? []].flat();

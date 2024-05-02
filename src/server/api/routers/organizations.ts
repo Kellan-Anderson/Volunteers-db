@@ -149,7 +149,22 @@ export const organizationsRouter = createTRPCRouter({
 
 			await ctx.db
 				.delete(organizations)
-				.where(eq(organizations.id, lastOrganizationId))
+				.where(eq(organizations.id, lastOrganizationId));
+
+			let redirect: string | undefined = undefined;
+			const nextOrganization = await ctx.db.query.organizationsAndUsers.findFirst({
+				where: eq(organizationsAndUsers.userId, userId)
+			});
+			if(!nextOrganization?.organizationId) {
+				redirect = '/new-organization'
+			} else {
+				// todo update all users with this org set as their last organization id
+				// await ctx.db
+				// 	.update(users)
+				// 	.set({ lastOrganizationId: nextOrganization.organizationId })
+				// 	.where(eq(users.id, userId))
+			}
+			return { redirect }
 		}),
 
 	removeUser: protectedProcedure
