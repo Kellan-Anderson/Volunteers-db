@@ -132,39 +132,30 @@ export const organizationsRouter = createTRPCRouter({
 
 	deleteOrganization: protectedProcedure
 		.mutation(async ({ ctx }) => {
+			// Validate the user has been setup
 			const { lastOrganizationId, id: userId } = ctx.session.user;
 			if(lastOrganizationId === null) {
 				throw new Error('User has not joined or setup an organization')
 			}
 
-			const permissionCheck = await ctx.db.query.organizationsAndUsers.findFirst({
-				where: and(
-					eq(organizationsAndUsers.organizationId, lastOrganizationId),
-					eq(organizationsAndUsers.userId, userId)
-				)
+			// Get details for the organization including emails and user permissions
+			const organizationDetails = await ctx.db.query.organizationsAndUsers.findMany({
+				where: eq(organizationsAndUsers.organizationId, lastOrganizationId),
+				with: {
+					user: true
+				}
 			});
 
-			if(permissionCheck?.permission !== 'owner')
+			// Validate the user is an owner
+			const userPermission = organizationDetails.find(u => u.userId === userId)!.permission;
+			if(userPermission !== 'owner')
 				throw new Error('You ust be an owner to change organization details');
 
+			// Delete the organization
 			await ctx.db
 				.delete(organizations)
 				.where(eq(organizations.id, lastOrganizationId));
 
-			let redirect: string | undefined = undefined;
-			const nextOrganization = await ctx.db.query.organizationsAndUsers.findFirst({
-				where: eq(organizationsAndUsers.userId, userId)
-			});
-			if(!nextOrganization?.organizationId) {
-				redirect = '/new-organization'
-			} else {
-				// todo update all users with this org set as their last organization id
-				// await ctx.db
-				// 	.update(users)
-				// 	.set({ lastOrganizationId: nextOrganization.organizationId })
-				// 	.where(eq(users.id, userId))
-			}
-			return { redirect }
 		}),
 
 	removeUser: protectedProcedure

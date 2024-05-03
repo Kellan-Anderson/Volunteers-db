@@ -1,5 +1,6 @@
-import { relations, sql } from "drizzle-orm";
+import { type ColumnBaseConfig, type ColumnDataType, relations, sql } from "drizzle-orm";
 import {
+  type PgColumn,
   boolean,
   index,
   integer,
@@ -30,7 +31,12 @@ export const users = createTable("user", {
     mode: "date",
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
-  lastOrganizationId: varchar('last_organization', { length: 255 }),
+  lastOrganizationId: varchar('last_organization', { length: 255 }).references(() => {
+    // This is required - vscode will throw an error claiming that the organization table is not defined
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    const orgId: PgColumn<ColumnBaseConfig<ColumnDataType, string>, {}, {}> = organizations.id
+    return orgId
+  }, { onDelete: 'set null' }),
   completedSetup: boolean('completed_setup').notNull().default(false),
 });
 
