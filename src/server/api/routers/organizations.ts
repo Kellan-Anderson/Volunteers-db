@@ -6,6 +6,7 @@ import { Resend } from "resend";
 import { env } from "~/env";
 import { RemoveUserEmail } from "~/components/emails/removeUserEmail";
 import { ChangePermissionsEmail } from "~/components/emails/changePermissionsEmail";
+import { OrganizationDeletedEmail } from "~/components/emails/deleteOrganizationEmail";
 
 export const organizationsRouter = createTRPCRouter({
 	newOrganization: protectedProcedure
@@ -138,23 +139,41 @@ export const organizationsRouter = createTRPCRouter({
 				throw new Error('User has not joined or setup an organization')
 			}
 
-			// Get details for the organization including emails and user permissions
-			const organizationDetails = await ctx.db.query.organizationsAndUsers.findMany({
-				where: eq(organizationsAndUsers.organizationId, lastOrganizationId),
+			// Get details for the organization including emails and users
+			const organizationDetails = await ctx.db.query.organizations.findFirst({
+				where: eq(organizations.id, lastOrganizationId),
 				with: {
-					user: true
+					organizationsAndUsers: {
+						with: {
+							user: true
+						}
+					}
 				}
 			});
 
-			// Validate the user is an owner
-			const userPermission = organizationDetails.find(u => u.userId === userId)!.permission;
-			if(userPermission !== 'owner')
+			if(!organizationDetails)
+				throw new Error('There was an issue finding the organization to delete')
+
+			const users = organizationDetails.organizationsAndUsers;
+
+			if(users.find(u => u.user.id === userId)!.permission !== 'owner' )
 				throw new Error('You ust be an owner to change organization details');
 
 			// Delete the organization
 			await ctx.db
 				.delete(organizations)
 				.where(eq(organizations.id, lastOrganizationId));
+
+			// Email organization members
+			const organizationUsersEmails = users.map(u => u.user.email);
+			const organizationName = organizationDetails.organizationName;
+			const resend = new Resend(env.RESEND_API_KEY);
+			await resend.emails.send({
+				to: organizationUsersEmails,
+				from: `${organizationName} <onboarding@resend.dev>`,
+				subject: 'Notification of organization removal',
+				react: OrganizationDeletedEmail({ organizationName })
+			})
 
 		}),
 
