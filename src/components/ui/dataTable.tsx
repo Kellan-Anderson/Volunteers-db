@@ -24,13 +24,15 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[],
-  paginate?: boolean
+  paginate?: boolean,
+  pageSize?: number
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   paginate=false,
+  pageSize=10
 }: DataTableProps<TData, TValue>) {
 
   const [sorting, setSorting] = useState<SortingState>([])
@@ -43,7 +45,11 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
     state: {
-      sorting
+      sorting,
+      pagination: {
+        pageSize,
+        pageIndex: 0
+      }
     }
   });
  

@@ -78,7 +78,7 @@ export const organizationUsersColumns: ColumnDef<userInfo>[] = [
 export function OrganizationUsersTable({ users } : UsersTableProps) {
   return (
     <>
-      <DataTable columns={organizationUsersColumns} data={users} paginate />
+      <DataTable columns={organizationUsersColumns} data={users} paginate pageSize={7} />
       <OrganizationUserActionDialog />
     </>
   );
