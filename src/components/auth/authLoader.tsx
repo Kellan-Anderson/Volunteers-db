@@ -6,11 +6,15 @@ import { useAppDispatch } from "~/redux/reduxHooks"
 import { api } from "~/trpc/react";
 
 export function AuthLoader() {
-  const authState = api.organizations.getCurrentOrganization.useQuery();
+  const authState = api.organizations.getUsersOrganizations.useQuery();
   const dispatch = useAppDispatch();
   useEffect(() => {
-    if(authState.data)
-      dispatch(setAuthState(authState.data.permission))
+    if(authState.data) {
+      const userCheck = authState.data;
+      if(userCheck.userHasOrganization) {
+        dispatch(setAuthState(userCheck.permission))
+      }
+    }
   }, [authState.data, dispatch])
   return <></>
 }

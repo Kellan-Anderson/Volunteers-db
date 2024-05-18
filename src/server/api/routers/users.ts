@@ -30,6 +30,24 @@ export const usersRouter = createTRPCRouter({
 					.where(eq(users.id, userId))
 			}
 
-			return { redirect }
+			return { redirect, newLastOrganizationId: nextOrganization!.organizationId }
+		}),
+
+	changeName: protectedProcedure
+		.input(z.object({
+			newName: z.string()
+		}))
+		.mutation(async ({ ctx, input }) => {
+			await ctx.db
+				.update(users)
+				.set({ name: input.newName })
+				.where(eq(users.id, ctx.session.user.id))
+		}),
+
+	deleteAccount: protectedProcedure
+		.mutation(async ({ ctx }) => {
+			await ctx.db
+				.delete(users)
+				.where(eq(users.id, ctx.session.user.id))
 		})
 })

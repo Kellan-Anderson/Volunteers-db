@@ -6,14 +6,14 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { api } from "~/trpc/react";
 
 type OrganizationDropdownProps = {
-	usersLastOrganization: string,
+	usersLastOrganizationId: string,
 	organizationsList: {
 		name: string,
 		id: string,
 	}[]
 }
 
-export function OrganizationDropdown({ organizationsList, usersLastOrganization } : OrganizationDropdownProps) {
+export function OrganizationDropdown({ organizationsList, usersLastOrganizationId } : OrganizationDropdownProps) {
 	const router = useRouter();
 	const { mutate: updateOrganization } = api.users.updateLastOrganization.useMutation({
 		onSuccess: () => router.refresh()
@@ -22,7 +22,7 @@ export function OrganizationDropdown({ organizationsList, usersLastOrganization 
 	return (
 		<div className="flex flex-row gap-1">
 			<Building className="h-9 w-9"/>
-			<Select defaultValue={usersLastOrganization} onValueChange={(selection) => updateOrganization({ orgId: selection })}>
+			<Select defaultValue={usersLastOrganizationId} onValueChange={(selection) => updateOrganization({ orgId: selection })}>
 				<SelectTrigger>
 					<SelectValue placeholder="Choose an organization"/>
 				</SelectTrigger>

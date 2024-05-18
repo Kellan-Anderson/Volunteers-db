@@ -19,8 +19,8 @@ type ChangeNameCardProps = {
 export function DeleteCard() {
   const router = useRouter();
   const { mutate } = api.organizations.deleteOrganization.useMutation({
-    onSuccess: ({ redirect }) => {
-      router.push(redirect ?? '/dashboard')
+    onSuccess: () => {
+      router.push('/dashboard')
     }
   });
 

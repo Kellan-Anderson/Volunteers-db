@@ -40,11 +40,28 @@ export async function verifyUser({ callbackUrl, redirectOnSignedIn, redirectTo }
 		redirect(`/new-organization?${callbackParams.toString()}`)
 	}
 
-	if(user.lastOrganizationId === null) {
-		const { redirect: redirectUrl } = await api.users.resetLastOrganization.mutate();
+	let organizationId = user.lastOrganizationId
+	if(organizationId === null) {
+		const { redirect: redirectUrl, newLastOrganizationId } = await api.users.resetLastOrganization.mutate();
 		if(redirectUrl)
-			redirect(redirectUrl)
+			redirect(redirectUrl);
+
+		organizationId = newLastOrganizationId;
 	}
 
-	return session.user
+	const organizationCheck = await api.organizations.getUsersOrganizations.query();
+	if(!organizationCheck.userHasOrganization) {
+		redirect(organizationCheck.redirectTo)
+	}
+
+	const { organizations, permission } = organizationCheck;
+
+	return {
+		user: {
+			...session.user,
+			lastOrganizationId: organizationId
+		},
+		permission,
+		organizations
+	}
 }

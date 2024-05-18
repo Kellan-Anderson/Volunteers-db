@@ -58,7 +58,7 @@ export const accounts = createTable(
   {
     userId: varchar("userId", { length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: 'cascade' }),
     type: AccountTypes("type").notNull(),
       // varchar("type", { length: 255 })
       // .$type<AdapterAccount["type"]>()
@@ -95,7 +95,7 @@ export const sessions = createTable(
       .primaryKey(),
     userId: varchar("userId", { length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: 'cascade' }),
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (session) => ({
@@ -177,9 +177,9 @@ export const volunteers = createTable('volunteers', {
   email: varchar('email', { length: 255 }).notNull(),
   phoneNumber: varchar('phone_number', { length: 20 }),
   notes: text('notes'),
-  organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id),
+  organizationId: varchar('organization_id', { length: 255 }).notNull().references(() => organizations.id, { onDelete: 'cascade' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  createdBy: varchar('created_by', { length: 255 }).notNull().references(() => users.id),
+  createdBy: varchar('created_by', { length: 255 }).default('deleted').notNull().references(() => users.id, { onDelete: 'set default' }),
   profilePictureUrl: varchar('profile_picture_url'),
 });
 

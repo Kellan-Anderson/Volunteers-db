@@ -7,6 +7,20 @@ import { env } from "~/env";
 import { RemoveUserEmail } from "~/components/emails/removeUserEmail";
 import { ChangePermissionsEmail } from "~/components/emails/changePermissionsEmail";
 import { OrganizationDeletedEmail } from "~/components/emails/deleteOrganizationEmail";
+import type { organizationPermissions } from "~/types";
+
+type getUserReturn = ({
+	userHasOrganization: true,
+	permission: organizationPermissions,
+	organizations: {
+		id: string,
+		name: string,
+		permission: organizationPermissions
+	}[]
+} | {
+	userHasOrganization: false
+	redirectTo: string
+})
 
 export const organizationsRouter = createTRPCRouter({
 	newOrganization: protectedProcedure
@@ -35,12 +49,25 @@ export const organizationsRouter = createTRPCRouter({
 				.insert(organizationsAndUsers)
 				.values({
 					organizationId,
-					userId
+					userId,
+					permission: 'owner'
 				})
 		}),
 
 	getUsersOrganizations: protectedProcedure
-		.query(async ({ ctx }) => {
+		.query(async ({ ctx }): Promise<getUserReturn> => {
+
+			const { lastOrganizationId, id } = ctx.session.user;
+			let usersLastOrganizationId: string = lastOrganizationId ?? '';
+			if(lastOrganizationId === null) {
+				const newIdCheck = await ctx.db.query.organizationsAndUsers.findFirst({
+					where: eq(organizationsAndUsers.userId, id)
+				})
+				if(!newIdCheck) {
+					return { redirectTo: '/new-organization', userHasOrganization: false }
+				}
+				usersLastOrganizationId = newIdCheck.organizationId
+			}
 			const userOrgs = await ctx.db.query.organizationsAndUsers.findMany({
 				where: eq(organizationsAndUsers.userId, ctx.session.user.id),
 				with: {
@@ -52,9 +79,10 @@ export const organizationsRouter = createTRPCRouter({
 				name: organization.organizationName,
 				id: organization.id,
 			}));
-			const { permission } = orgs.find(o => o.id === ctx.session.user.lastOrganizationId)!
+			const { permission } = orgs.find(o => o.id === usersLastOrganizationId)!
 
 			return {
+				userHasOrganization: true,
 				permission,
 				organizations: orgs,
 			}
@@ -341,5 +369,25 @@ export const organizationsRouter = createTRPCRouter({
 				image: userInfo.user.image,
 				volunteers: userVolunteers.map(({ id, name, createdAt, url }) => ({ id, name, createdAt, url }))
 			}
-		})
+		}),
+
+	leaveOrganization: protectedProcedure
+		.input(z.object({
+			organizationId: z.string()
+		}))
+		.mutation(async ({ ctx, input }) => {
+			const { lastOrganizationId, id } = ctx.session.user
+			if(input.organizationId === lastOrganizationId) {
+				await ctx.db
+					.update(users)
+					.set({ lastOrganizationId: null })
+					.where(eq(users.id, id))
+			}
+			await ctx.db
+				.delete(organizationsAndUsers)
+				.where(and(
+					eq(organizationsAndUsers.userId, id),
+					eq(organizationsAndUsers.organizationId, input.organizationId)
+				))
+			})
 })
