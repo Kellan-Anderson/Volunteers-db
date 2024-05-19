@@ -10,6 +10,7 @@ import { UserInfoVolunteersTable } from "./_myOrganizationComponents/userInfoVol
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import { Card } from "~/components/ui/card";
+import { InviteUserButton } from "./_myOrganizationComponents/inviteUsersButton";
 
 dayjs.extend(relativeTime)
 
@@ -37,34 +38,6 @@ export default async function MyOrganizationPage({ searchParams } : MyOrganizati
   const usersCount = users.length;
   const filtersCount = filters.length;
 
-  const testUsers = [
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-    ...users,
-  ]
-
   return (
     <div className="w-full max-h-screen p-3 pt-2">
       <div className="flex flex-row justify-between items-center pb-2 pt-1 relative ml-10 lg:ml-0">
@@ -82,8 +55,11 @@ export default async function MyOrganizationPage({ searchParams } : MyOrganizati
           <CountCard count={usersCount}>Users</CountCard>
           <CountCard count={filtersCount}>Filters</CountCard>
         </div>
-        <p className="font-semibold pb-1 pt-2 pl-1">Users:</p>
-        <OrganizationUsersTable users={testUsers} />
+        <div className="flex flex-row justify-between items-center w-full py-2 pl-1">
+          <p className="font-semibold">Users:</p>
+          {permission !== 'user' && <InviteUserButton />}
+        </div>
+        <OrganizationUsersTable users={users} />
       </div>
       {selectedUser && <UserInfo userId={selectedUser} />}
     </div>
